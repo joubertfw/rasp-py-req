@@ -112,7 +112,7 @@ class lcd:
       self.lcd_write(LCD_RETURNHOME)
 
    def lcd_display(self, string_1, string_2 = None):
-      if texto2 is not None:
+      if string_2 is not None:
          self.lcd_clear()
          self.lcd_display_string(string_1, 1)
          self.lcd_display_string(string_2, 2)
