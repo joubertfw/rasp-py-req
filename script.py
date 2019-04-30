@@ -45,11 +45,12 @@ def changeRGBLed(r, g, b):
     GPIO.output(LED1_BLUE, b)
 
 def verifyConnection():
-    print(code)
+    
     url = "http://172.16.10.243/MMHWebAPI/api/Produto?echo=ConnectionTest"
     headers = {"APIkey" : APIKEY }
     global code
     while (True):
+        print(code)
         try:
             resp = requests.get(url, headers = headers)
             if resp.status_code != 200:
