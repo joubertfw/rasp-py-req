@@ -27,29 +27,9 @@ APIKEY = "!@##@!c3p3d1!@##@!"
 
 code = -1
 
-listStatus = [LedStatus(0,1,0), LedStatus(0,0,1)]
-
 #Leitura de arquivos
 arqIn = open(os.getcwd() + "/status", "r")
 inputs = arqIn.readlines()
-
-class LedStatus:
-    def __init__(self, r = 0, g = 0, b = 0):
-        self.r = r
-        self.g = g
-        self.b = b
-    
-    def getData(self):
-        print("r = {0} g = {1} b = {2}".format(self.r, self.g, self.b))
-
-    def getRED(self):
-        return self.r
-
-    def getGREEN(self):
-        return self.g
-
-    def getBLUE(self):
-        return self.b
     
 def getMAC(interface='wlan0'):
     # Return the MAC address of the specified interface
@@ -104,8 +84,10 @@ def changeDisplayLed(texto):
 def ledStatusChange():    
     try:
         changeDisplayLed(inputs[code])
-        if code in [0, 1]:
-            changeRGBLed(listStatus[code].getRED(), listStatus[code].getGREEN(), listStatus[code].getBLUE())         
+        if code == 0:
+            changeRGBLed(0, 1, 0)
+        elif code == 1:
+            changeRGBLed(0, 0, 1)
         elif code in [2, 3, 4, 5, 6, 7, 8, 9, 10]:             
             changeRGBLed(1, 0, 0)                      
     except:
