@@ -116,7 +116,7 @@ try:
         except:            
             print("EXCEPT REQUISITO")
         
-        if resp.status_code != 200 or code < 0:
+        if resp.status_code != 200 or code < -1:
             print("AQUI")               
         else:
             print('Success: ' + str(resp.text))
