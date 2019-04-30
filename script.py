@@ -105,10 +105,8 @@ connThread = Thread(target=verifyConnection, args=[])
 connThread.start()
 
 try:
-    while (True):
-        if code != -2:
-            numeroSerie = input()
-        
+    while (True):        
+        numeroSerie = input()        
         changeRGBLed(0, 0, 0)
         sensorMAC = getMAC()
         url = "http://172.16.10.243/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
