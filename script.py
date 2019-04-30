@@ -111,33 +111,34 @@ try:
         sensorMAC = getMAC()
         url = "http://172.16.10.243/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
         
-        lcd.lcd_display("  PROCESSANDO")
-        
-        if code != -2:
-            resp = requests.post(url, headers = headers, timeout = 1)
-            
-        if resp.status_code != 200 or code == -2:
-            print("AQUI")               
-        else:
-            print('Success: ' + str(resp.text))
-            print(resp.status_code)
-            jsonResp = json.loads(str(resp.text))    
-            print(jsonResp["Resultado"])
-            resultCode = int(jsonResp["Resultado"])
-            code = resultCode
-            ledStatusChange()
-            if resultCode == 1: # Necessita amarração
-                numeroSerieNovo = input()
-                url = "http://172.16.10.243/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
-                resp = requests.post(url, headers = headers)
-                if resp.status_code != 200:
-                    code = -1
-                else:
-                    jsonResp = json.loads(str(resp.text))    
-                    print(jsonResp["Resultado"])
-                    resultCode = int(jsonResp["Resultado"])
-                    code = resultCode
-                    ledStatusChange()
+        if code != -2:        
+            lcd.lcd_display("  PROCESSANDO")
+
+            if code != -2:
+                resp = requests.post(url, headers = headers, timeout = 1)
+
+            if resp.status_code != 200 or code == -2:
+                print("AQUI")               
+            else:
+                print('Success: ' + str(resp.text))
+                print(resp.status_code)
+                jsonResp = json.loads(str(resp.text))    
+                print(jsonResp["Resultado"])
+                resultCode = int(jsonResp["Resultado"])
+                code = resultCode
+                ledStatusChange()
+                if resultCode == 1: # Necessita amarração
+                    numeroSerieNovo = input()
+                    url = "http://172.16.10.243/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
+                    resp = requests.post(url, headers = headers)
+                    if resp.status_code != 200:
+                        code = -1
+                    else:
+                        jsonResp = json.loads(str(resp.text))    
+                        print(jsonResp["Resultado"])
+                        resultCode = int(jsonResp["Resultado"])
+                        code = resultCode
+                        ledStatusChange()
 except:
     print("EXCEPT main")
 finally:
