@@ -55,7 +55,7 @@ def verifyConnection():
             resp = requests.get(url, headers = headers)
             if resp.status_code != 200:
                 code = -2                
-                lcd.lcd_display("  SEM SERVIDOR", 1)
+                lcd.lcd_display("  SEM SERVIDOR")
                 changeRGBLed(1, 0, 0)
                 time.sleep(1.0)
                 changeRGBLed(0, 0, 0)
@@ -63,7 +63,7 @@ def verifyConnection():
                 code = -1
         except:
             code = -2
-            lcd.lcd_display("    SEM REDE", 1)
+            lcd.lcd_display("    SEM REDE")
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
             changeRGBLed(0, 0, 0)       
