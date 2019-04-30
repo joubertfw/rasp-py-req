@@ -44,7 +44,8 @@ def changeRGBLed(r, g, b):
     GPIO.output(LED1_GREEN, g)
     GPIO.output(LED1_BLUE, b)
 
-def verifyConnection():    
+def verifyConnection():
+    print(code)
     url = "http://172.16.10.243/MMHWebAPI/api/Produto?echo=ConnectionTest"
     headers = {"APIkey" : APIKEY }
     global code
