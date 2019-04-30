@@ -105,20 +105,20 @@ connThread = Thread(target=verifyConnection, args=[])
 connThread.start()
 
 try:
-    while (True):        
-        numeroSerie = input()
+    while (True):
+        if code != -2:
+            numeroSerie = input()
+        
         changeRGBLed(0, 0, 0)
         sensorMAC = getMAC()
         url = "http://172.16.10.243/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
         
         lcd.lcd_display("  PROCESSANDO")
         
-        try:
+        if code != -2:
             resp = requests.post(url, headers = headers)
-        except:            
-            print("EXCEPT REQUISITO")
-        
-        if resp.status_code != 200 or code < -1:
+            
+        if resp.status_code != 200 or code == -2:
             print("AQUI")               
         else:
             print('Success: ' + str(resp.text))
