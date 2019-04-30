@@ -52,7 +52,7 @@ def verifyConnection():
     while (True):
         print(code)
         try:
-            resp = requests.get(url, headers = headers)
+            resp = requests.get(url, headers = headers, timeout = 1)
             if resp.status_code != 200:
                 code = -2                
                 lcd.lcd_display("  SEM SERVIDOR")
@@ -114,7 +114,7 @@ try:
         lcd.lcd_display("  PROCESSANDO")
         
         if code != -2:
-            resp = requests.post(url, headers = headers)
+            resp = requests.post(url, headers = headers, timeout = 1)
             
         if resp.status_code != 200 or code == -2:
             print("AQUI")               
