@@ -48,10 +48,11 @@ def verifyConnection():
     url = "http://172.16.10.243/MMHWebAPI/api/Produto?echo=ConnectionTest"
     headers = {"APIkey" : APIKEY }
     global code    
-    while (True):
-        codeAnterior = code
+    codeAnterior = code
+    while (True):        
         if codeAnterior == -2 and code == -1:
             lcd.lcd_display("     PRONTO", spaceText(''.join(getMAC().split(':'))))                        
+        codeAnterior = code
         try:
             resp = requests.get(url, headers = headers, timeout = 1)
             if resp.status_code != 200:
