@@ -47,9 +47,11 @@ def changeRGBLed(r, g, b):
 def verifyConnection():    
     url = "http://172.16.10.243/MMHWebAPI/api/Produto?echo=ConnectionTest"
     headers = {"APIkey" : APIKEY }
-    global code
+    global code    
     while (True):
-        print(code)
+        codeAnterior = code
+        if codeAnterior == -2 and code == -1:
+            lcd.lcd_display("     PRONTO", spaceText(''.join(getMAC().split(':'))))                        
         try:
             resp = requests.get(url, headers = headers, timeout = 1)
             if resp.status_code != 200:
