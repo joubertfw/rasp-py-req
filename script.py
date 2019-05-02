@@ -44,8 +44,7 @@ def changeRGBLed(r, g, b):
     GPIO.output(LED1_GREEN, g)
     GPIO.output(LED1_BLUE, b)
 
-def verifyConnection():
-    
+def verifyConnection():    
     url = "http://172.16.10.243/MMHWebAPI/api/Produto?echo=ConnectionTest"
     headers = {"APIkey" : APIKEY }
     global code
@@ -83,14 +82,14 @@ def changeDisplayLed(texto):
     else:
         lcd.lcd_display(spaceText(texto[:len(texto)-1]))
 
-def ledStatusChange():    
+def ledStatusChange(ledCode):    
     try:
-        changeDisplayLed(inputs[code])
-        if code == 0:
+        changeDisplayLed(inputs[ledCode])
+        if ledCode == 0:
             changeRGBLed(0, 1, 0)
-        elif code == 1:
+        elif ledCode == 1:
             changeRGBLed(0, 0, 1)
-        elif code in [2, 3, 4, 5, 6, 7, 8, 9, 10]:             
+        elif ledCode in [2, 3, 4, 5, 6, 7, 8, 9, 10]:             
             changeRGBLed(1, 0, 0)                      
     except:
         print("EXCEPT ledStatusChange")
@@ -113,9 +112,13 @@ try:
         
         if code != -2:        
             lcd.lcd_display("  PROCESSANDO")
-            resp = requests.post(url, headers = headers, timeout = 1)
+            
+            try:
+                resp = requests.post(url, headers = headers, timeout = 1)
+            except:
+                code = -2
 
-            if resp.status_code != 200:
+            if resp.status_code != 200 or code == -2:
                 print("AQUI")               
             else:
                 print('Success: ' + str(resp.text))
@@ -123,8 +126,8 @@ try:
                 jsonResp = json.loads(str(resp.text))    
                 print(jsonResp["Resultado"])
                 resultCode = int(jsonResp["Resultado"])
-                code = resultCode
-                ledStatusChange()
+                # code = resultCode
+                ledStatusChange(resultCode)
                 if resultCode == 1: # Necessita amarração
                     numeroSerieNovo = input()
                     url = "http://172.16.10.243/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
@@ -135,8 +138,8 @@ try:
                         jsonResp = json.loads(str(resp.text))    
                         print(jsonResp["Resultado"])
                         resultCode = int(jsonResp["Resultado"])
-                        code = resultCode
-                        ledStatusChange()
+                        # code = resultCode
+                        ledStatusChange(resultCode)
 except:
     print("EXCEPT main")
 finally:
