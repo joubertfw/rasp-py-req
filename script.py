@@ -118,7 +118,7 @@ try:
             lcd.lcd_display("  PROCESSANDO")
             
             try:
-                resp = requests.post(url, headers = headers, timeout = 1)
+                resp = requests.post(url, headers = headers, timeout = 10)
             except requests.exceptions.Timeout:
                 code = -3
                 changeRGBLed(1, 0, 0)
