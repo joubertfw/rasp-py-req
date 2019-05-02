@@ -113,11 +113,9 @@ try:
         
         if code != -2:        
             lcd.lcd_display("  PROCESSANDO")
+            resp = requests.post(url, headers = headers, timeout = 1)
 
-            if code != -2:
-                resp = requests.post(url, headers = headers, timeout = 1)
-
-            if resp.status_code != 200 or code == -2:
+            if resp.status_code != 200:
                 print("AQUI")               
             else:
                 print('Success: ' + str(resp.text))
