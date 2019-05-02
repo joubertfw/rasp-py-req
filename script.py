@@ -118,7 +118,7 @@ try:
             lcd.lcd_display("  PROCESSANDO")
             
             try:
-                resp = requests.post(url, headers = headers, timeout = 1)
+                resp = requests.post(url, headers = headers, timeout = 10)
             except:
                 code = -2
 
