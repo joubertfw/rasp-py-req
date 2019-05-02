@@ -49,7 +49,8 @@ def verifyConnection():
     headers = {"APIkey" : APIKEY }
     global code    
     codeAnterior = code
-    while (True):        
+    while (True):  
+        print(code)
         if codeAnterior == -2 and code == -1:
             lcd.lcd_display("     PRONTO", spaceText(''.join(getMAC().split(':'))))                        
         codeAnterior = code
@@ -123,6 +124,8 @@ try:
 
             if resp.status_code != 200 or code == -2:
                 print("AQUI")               
+                print(code)
+                print(resp.status_code)
             else:
                 print('Success: ' + str(resp.text))
                 print(resp.status_code)
