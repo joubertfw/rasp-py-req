@@ -120,8 +120,9 @@ try:
             try:
                 resp = requests.post(url, headers = headers, timeout = 1)
             except requests.exceptions.Timeout:
-                code = -2
-                lcd.lcd_display("  SEM RESPOSTA")                
+                code = -3
+                changeRGBLed(1, 0, 0)
+                lcd.lcd_display("TENTE NOVAMENTE")                
             except:
                 code = -2
 
