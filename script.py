@@ -64,12 +64,18 @@ def verifyConnection():
                 changeRGBLed(0, 0, 0)
             else:                
                 code = -1
-        except:
+        except requests.exceptions.RequestException:
+            code = -2
+            lcd.lcd_display("  SEM SERVIDOR")
+            changeRGBLed(1, 0, 0)
+            time.sleep(1.0)
+            changeRGBLed(0, 0, 0)  
+        except requests.exceptions.ConnectionError:
             code = -2
             lcd.lcd_display("    SEM REDE")
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
-            changeRGBLed(0, 0, 0)       
+            changeRGBLed(0, 0, 0)             
         time.sleep(2.0)
         if code == -2:
             lcd.lcd_clear()
