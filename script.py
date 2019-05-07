@@ -56,6 +56,8 @@ def verifyConnection():
         codeAnterior = code
         try:
             resp = requests.get(url, headers = headers, timeout = 1)
+            resp.raise_for_status()
+            
             if resp.status_code != 200:
                 code = -2                
                 lcd.lcd_display("  SEM SERVIDOR")
@@ -69,13 +71,31 @@ def verifyConnection():
             lcd.lcd_display("    SEM REDE")
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
-            changeRGBLed(0, 0, 0)   
+            changeRGBLed(0, 0, 0)            
+             except requests.exceptions.TooManyRedirects:
+            code = -2
+            lcd.lcd_display("  SEM SERVIDOR")
+            changeRGBLed(1, 0, 0)
+            time.sleep(1.0)
+            changeRGBLed(0, 0, 0) 
+         except requests.exceptions.Timeout:
+            code = -2
+            lcd.lcd_display("  SEM SERVIDOR")
+            changeRGBLed(1, 0, 0)
+            time.sleep(1.0)
+            changeRGBLed(0, 0, 0) 
+        except requests.exceptions.HTTPError:
+            code = -2
+            lcd.lcd_display("  SEM SERVIDOR")
+            changeRGBLed(1, 0, 0)
+            time.sleep(1.0)
+            changeRGBLed(0, 0, 0)
         except requests.exceptions.RequestException:
             code = -2
             lcd.lcd_display("  SEM SERVIDOR")
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
-            changeRGBLed(0, 0, 0)                    
+            changeRGBLed(0, 0, 0)  
         time.sleep(2.0)
         if code == -2:
             lcd.lcd_clear()
