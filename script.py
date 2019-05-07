@@ -71,31 +71,36 @@ def verifyConnection():
             lcd.lcd_display("    SEM REDE")
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
-            changeRGBLed(0, 0, 0)            
+            changeRGBLed(0, 0, 0)
+            print("ConnectionError")
         except requests.exceptions.TooManyRedirects:
             code = -2
             lcd.lcd_display("  SEM SERVIDOR")
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
             changeRGBLed(0, 0, 0) 
+            print("TooManyRedirects")
         except requests.exceptions.Timeout:
             code = -2
             lcd.lcd_display("  SEM SERVIDOR")
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
             changeRGBLed(0, 0, 0) 
+            print("Timeout")
         except requests.exceptions.HTTPError:
             code = -2
             lcd.lcd_display("  SEM SERVIDOR")
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
             changeRGBLed(0, 0, 0)
+            print("HTTPError")
         except requests.exceptions.RequestException:
             code = -2
             lcd.lcd_display("  SEM SERVIDOR")
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
-            changeRGBLed(0, 0, 0)  
+            changeRGBLed(0, 0, 0) 
+            print("RequestException")
         time.sleep(2.0)
         if code == -2:
             lcd.lcd_clear()
