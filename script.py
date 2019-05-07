@@ -78,7 +78,7 @@ def verifyConnection():
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
             changeRGBLed(0, 0, 0) 
-         except requests.exceptions.Timeout:
+        except requests.exceptions.Timeout:
             code = -2
             lcd.lcd_display("  SEM SERVIDOR")
             changeRGBLed(1, 0, 0)
