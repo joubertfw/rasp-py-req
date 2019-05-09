@@ -23,16 +23,26 @@ GPIO.output(LED1_GREEN, 0)
 GPIO.setup(LED1_BLUE,GPIO.OUT)
 GPIO.output(LED1_BLUE, 0)
 
-APIKEY = "!@##@!c3p3d1!@##@!"
-
-code = -1
-
 #Leitura de arquivos
 arqIn = open(os.getcwd() + "/status", "r")
-inputs = arqIn.readlines()
+status = arqIn.readlines()
+
+arqIn = open(os.getcwd() + "/config", "r")
+config = arqIn.readlines()
+
+appUrl = config[0]
+APIKEY = config[1]
+PRONTO = config[2]
+PROCESS = config[3]
+S_SERV = config[4]
+S_REDE = config[5]
+INICIA = config[6]
+TENTE_NOV = config[7]
+
+code = -1
     
 def getMAC(interface='wlan0'):
-    # Return the MAC address of the specified interface
+    # Retorna o endereço MAC da interface especifica
     try:
         str = open('/sys/class/net/%s/address' %interface).read()
     except:
@@ -45,14 +55,14 @@ def changeRGBLed(r, g, b):
     GPIO.output(LED1_BLUE, b)
 
 def verifyConnection():    
-    url = "http://172.16.10.243/MMHWebAPI/api/Produto?echo=ConnectionTest"
+    url = "http://" + appUrl + "/MMHWebAPI/api/Produto?echo=ConnectionTest"
     headers = {"APIkey" : APIKEY }
     global code    
     codeAnterior = code
     while (True):  
         print(code)
         if codeAnterior == -2 and code == -1:
-            lcd.lcd_display("     PRONTO", spaceText(''.join(getMAC().split(':'))))                        
+            lcd.lcd_display(spaceText(PRONTO), spaceText(''.join(getMAC().split(':'))))                        
         codeAnterior = code
         try:
             resp = requests.get(url, headers = headers, timeout = 1)
@@ -60,47 +70,18 @@ def verifyConnection():
             
             if resp.status_code != 200:
                 code = -2                
-                lcd.lcd_display("  SEM SERVIDOR")
+                lcd.lcd_display(spaceText(S_SERV))
                 changeRGBLed(1, 0, 0)
                 time.sleep(1.0)
                 changeRGBLed(0, 0, 0)
             else:                
                 code = -1
-        except requests.exceptions.ConnectionError:
+        except:
             code = -2
-            lcd.lcd_display("    SEM REDE")
+            lcd.lcd_display(spaceText(S_REDE))
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
-            changeRGBLed(0, 0, 0)
-            print("ConnectionError")
-        except requests.exceptions.TooManyRedirects:
-            code = -2
-            lcd.lcd_display("  SEM SERVIDOR")
-            changeRGBLed(1, 0, 0)
-            time.sleep(1.0)
-            changeRGBLed(0, 0, 0) 
-            print("TooManyRedirects")
-        except requests.exceptions.Timeout:
-            code = -2
-            lcd.lcd_display("  SEM SERVIDOR")
-            changeRGBLed(1, 0, 0)
-            time.sleep(1.0)
-            changeRGBLed(0, 0, 0) 
-            print("Timeout")
-        except requests.exceptions.HTTPError:
-            code = -2
-            lcd.lcd_display("  SEM SERVIDOR")
-            changeRGBLed(1, 0, 0)
-            time.sleep(1.0)
-            changeRGBLed(0, 0, 0)
-            print("HTTPError")
-        except requests.exceptions.RequestException:
-            code = -2
-            lcd.lcd_display("  SEM SERVIDOR")
-            changeRGBLed(1, 0, 0)
-            time.sleep(1.0)
-            changeRGBLed(0, 0, 0) 
-            print("RequestException")
+            changeRGBLed(0, 0, 0)                    
         time.sleep(2.0)
         if code == -2:
             lcd.lcd_clear()
@@ -119,7 +100,7 @@ def changeDisplayLed(texto):
 
 def ledStatusChange(ledCode):    
     try:
-        changeDisplayLed(inputs[ledCode])
+        changeDisplayLed(status[ledCode])
         if ledCode == 0:
             changeRGBLed(0, 1, 0)
         elif ledCode == 1:
@@ -131,9 +112,9 @@ def ledStatusChange(ledCode):
 
 headers = {"APIkey" : APIKEY }
 
-lcd.lcd_display(" INICIALIZANDO")
+lcd.lcd_display(spaceText(INICIA))
 time.sleep(5)
-lcd.lcd_display("     PRONTO", spaceText(''.join(getMAC().split(':'))))
+lcd.lcd_display(spaceText(PRONTO), spaceText(''.join(getMAC().split(':'))))
 
 connThread = Thread(target=verifyConnection, args=[])
 connThread.start()
@@ -143,17 +124,17 @@ try:
         numeroSerie = input()        
         changeRGBLed(0, 0, 0)
         sensorMAC = getMAC()
-        url = "http://172.16.10.243/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
+        url = "http://"+ appUrl + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
         
         if code != -2:        
-            lcd.lcd_display("  PROCESSANDO")
+            lcd.lcd_display(spaceText(PROCESS))
             
             try:
                 resp = requests.post(url, headers = headers, timeout = 10)
             except requests.exceptions.Timeout:
                 code = -3
                 changeRGBLed(1, 0, 0)
-                lcd.lcd_display("TENTE NOVAMENTE")                
+                lcd.lcd_display(spaceText(TENTE_NOV))                
             except:
                 code = -2
 
@@ -169,9 +150,10 @@ try:
                 resultCode = int(jsonResp["Resultado"])
                 # code = resultCode
                 ledStatusChange(resultCode)
-                if resultCode == 1: # Necessita amarração
+                if resultCode == 1: 
+                    # Necessita amarração
                     numeroSerieNovo = input()
-                    url = "http://172.16.10.243/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
+                    url = "http://" + appUrl + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
                     resp = requests.post(url, headers = headers)
                     if resp.status_code != 200:
                         code = -1
