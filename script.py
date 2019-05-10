@@ -61,6 +61,7 @@ def verifyConnection():
     codeAnterior = code
     while (True):  
         print(code)
+        print(url)
         if codeAnterior == -2 and code == -1:
             lcd.lcd_display(spaceText(PRONTO), spaceText(''.join(getMAC().split(':'))))                        
         codeAnterior = code
