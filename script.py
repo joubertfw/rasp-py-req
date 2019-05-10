@@ -25,7 +25,7 @@ GPIO.output(LED1_BLUE, 0)
 
 #Leitura de arquivos
 arqIn = open(os.getcwd() + "/status", "r")
-status = arqIn.read().splitlines()
+status = arqIn.readlines()
 
 arqIn = open(os.getcwd() + "/config", "r")
 config = arqIn.read().splitlines()
