@@ -25,10 +25,10 @@ GPIO.output(LED1_BLUE, 0)
 
 #Leitura de arquivos
 arqIn = open(os.getcwd() + "/status", "r")
-status = arqIn.readlines()
+status = arqIn.read().splitlines()
 
 arqIn = open(os.getcwd() + "/config", "r")
-config = arqIn.readlines()
+config = arqIn.read().splitlines()
 
 appUrl = config[0]
 APIKEY = config[1]
