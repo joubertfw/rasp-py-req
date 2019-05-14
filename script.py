@@ -24,6 +24,13 @@ GPIO.setup(LED1_BLUE,GPIO.OUT)
 GPIO.output(LED1_BLUE, 0)
 
 #Leitura de arquivos
+<<<<<<< HEAD
+with open('config.json', 'r') as f:
+    jsonFile = json.load(f)    
+    config = jsonFile['CONFIG']
+    status = jsonFile['STATUS']
+    
+=======
 arqIn = open(os.getcwd() + "/status", "r")
 status = arqIn.readlines()
 
@@ -39,6 +46,7 @@ S_REDE = config[5]
 INICIA = config[6]
 TENTE_NOV = config[7]
 
+>>>>>>> dca71dd5a12b67daca978046fb4e9cc68ecbde45
 code = -1
     
 def getMAC(interface='wlan0'):
@@ -55,15 +63,15 @@ def changeRGBLed(r, g, b):
     GPIO.output(LED1_BLUE, b)
 
 def verifyConnection():    
-    url = "http://" + appUrl + "/MMHWebAPI/api/Produto?echo=ConnectionTest"
-    headers = {"APIkey" : APIKEY }
+    url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?echo=ConnectionTest"
+    headers = {"APIkey" : config['SERVER_KEY'] }
     global code    
     codeAnterior = code
     while (True):  
         print(code)
         print(url)
         if codeAnterior == -2 and code == -1:
-            lcd.lcd_display(spaceText(PRONTO), spaceText(''.join(getMAC().split(':'))))                        
+            lcd.lcd_display(spaceText(config['SERVER_READY']), spaceText(''.join(getMAC().split(':'))))                        
         codeAnterior = code
         try:
             resp = requests.get(url, headers = headers, timeout = 1)
@@ -71,7 +79,7 @@ def verifyConnection():
             
             if resp.status_code != 200:
                 code = -2                
-                lcd.lcd_display(spaceText(S_SERV))
+                lcd.lcd_display(spaceText(config['SERVER_DOWN']))
                 changeRGBLed(1, 0, 0)
                 time.sleep(1.0)
                 changeRGBLed(0, 0, 0)
@@ -79,7 +87,7 @@ def verifyConnection():
                 code = -1
         except:
             code = -2
-            lcd.lcd_display(spaceText(S_REDE))
+            lcd.lcd_display(spaceText(config['SERVER_NOCONN']))
             changeRGBLed(1, 0, 0)
             time.sleep(1.0)
             changeRGBLed(0, 0, 0)                    
@@ -111,11 +119,11 @@ def ledStatusChange(ledCode):
     except:
         print("EXCEPT ledStatusChange")
 
-headers = {"APIkey" : APIKEY }
+headers = {"APIkey" : config['SERVER_KEY'] }
 
-lcd.lcd_display(spaceText(INICIA))
+lcd.lcd_display(spaceText(config['SERVER_INITIALIZING']))
 time.sleep(5)
-lcd.lcd_display(spaceText(PRONTO), spaceText(''.join(getMAC().split(':'))))
+lcd.lcd_display(spaceText(config['SERVER_READY']), spaceText(''.join(getMAC().split(':'))))
 
 connThread = Thread(target=verifyConnection, args=[])
 connThread.start()
@@ -125,17 +133,17 @@ try:
         numeroSerie = input()        
         changeRGBLed(0, 0, 0)
         sensorMAC = getMAC()
-        url = "http://"+ appUrl + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
+        url = "http://"+ config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
         
         if code != -2:        
-            lcd.lcd_display(spaceText(PROCESS))
+            lcd.lcd_display(spaceText(config['SERVER_PROCESSING']))
             
             try:
                 resp = requests.post(url, headers = headers, timeout = 10)
             except requests.exceptions.Timeout:
                 code = -3
                 changeRGBLed(1, 0, 0)
-                lcd.lcd_display(spaceText(TENTE_NOV))                
+                lcd.lcd_display(spaceText(config['SERVER_TRYAGAIN']))                
             except:
                 code = -2
 
@@ -154,7 +162,7 @@ try:
                 if resultCode == 1: 
                     # Necessita amarração
                     numeroSerieNovo = input()
-                    url = "http://" + appUrl + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
+                    url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
                     resp = requests.post(url, headers = headers)
                     if resp.status_code != 200:
                         code = -1
