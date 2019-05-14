@@ -24,29 +24,11 @@ GPIO.setup(LED1_BLUE,GPIO.OUT)
 GPIO.output(LED1_BLUE, 0)
 
 #Leitura de arquivos
-<<<<<<< HEAD
 with open('config.json', 'r') as f:
     jsonFile = json.load(f)    
     config = jsonFile['CONFIG']
     status = jsonFile['STATUS']
     
-=======
-arqIn = open(os.getcwd() + "/status", "r")
-status = arqIn.readlines()
-
-arqIn = open(os.getcwd() + "/config", "r")
-config = arqIn.read().splitlines()
-
-appUrl = config[0]
-APIKEY = config[1]
-PRONTO = config[2]
-PROCESS = config[3]
-S_SERV = config[4]
-S_REDE = config[5]
-INICIA = config[6]
-TENTE_NOV = config[7]
-
->>>>>>> dca71dd5a12b67daca978046fb4e9cc68ecbde45
 code = -1
     
 def getMAC(interface='wlan0'):
