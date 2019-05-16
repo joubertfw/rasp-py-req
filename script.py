@@ -91,6 +91,7 @@ def changeDisplayLed(texto):
 
 def ledStatusChange(ledCode):    
     try:
+        print(status)
         changeDisplayLed(status[ledCode])
         if ledCode == 0:
             changeRGBLed(0, 1, 0)
