@@ -99,7 +99,8 @@ def ledStatusChange(ledCode):
             changeRGBLed(0, 0, 1)
         elif ledCode in [2, 3, 4, 5, 6, 7, 8, 9, 10]:             
             changeRGBLed(1, 0, 0)                      
-    except:
+    except Exception as e: 
+        print(e)
         print("EXCEPT ledStatusChange")
 
 headers = {"APIkey" : config['SERVER_KEY'] }
