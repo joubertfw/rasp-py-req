@@ -84,10 +84,10 @@ def changeDisplayLed(texto):
     if texto.count(' '):
         for i in reversed(range(0,16)):
             if texto[i] == " ":
-                lcd.lcd_display(spaceText(texto[:i]), spaceText(texto[i+1:len(texto)]))                
+                lcd.lcd_display(spaceText(texto[:i]), spaceText(texto[i+1:len(texto)-1]))                
                 break
     else:
-        lcd.lcd_display(spaceText(texto[:len(texto)]))
+        lcd.lcd_display(spaceText(texto[:len(texto)-1]))
 
 def ledStatusChange(ledCode):    
     try:
