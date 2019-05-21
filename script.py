@@ -48,7 +48,7 @@ def verifyConnection():
     headers = {"APIkey" : config['SERVER_KEY'] }
     global code
     codeAnterior = code
-    while (True):                
+    while (True):
         if codeAnterior == -2 and code == -1:
             lcd.lcd_display(spaceText(config['SERVER_READY']), spaceText(''.join(getMAC().split(':'))))
         codeAnterior = code
@@ -63,7 +63,7 @@ def verifyConnection():
                 changeRGBLed(0, 0, 0)
             else:
                 code = -1
-        except Exception as e:            
+        except Exception as e:
             print(e)
             code = -2
             lcd.lcd_display(spaceText(config['SERVER_NOCONN']))
@@ -119,7 +119,7 @@ try:
 
             try:
                 resp = requests.post(url, headers = headers, timeout = 10)
-            except requests.exceptions.Timeout:                
+            except requests.exceptions.Timeout:
                 code = -3
                 changeRGBLed(1, 0, 0)
                 lcd.lcd_display(spaceText(config['SERVER_TRYAGAIN']))
