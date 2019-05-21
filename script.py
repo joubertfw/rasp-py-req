@@ -22,7 +22,7 @@ GPIO.output(LED1_GREEN, 0)
 GPIO.setup(LED1_BLUE,GPIO.OUT)
 GPIO.output(LED1_BLUE, 0)
 
-with open('config.json', 'r') as f:
+with open('/home/pi/rasp-py-req/config.json', 'r') as f:
     jsonFile = json.load(f)
     config = jsonFile['CONFIG']
     status = jsonFile['STATUS']
@@ -74,10 +74,10 @@ def verifyConnection():
         if code == -2:
             lcd.lcd_clear()
 
-def spaceText(texto):
+def spaceText(texto = ' '):
     return " " * int((16 - len(texto))/2) + texto
 
-def changeDisplayLed(texto):
+def changeDisplayLed(texto = ' '):
     if texto.count(' '):
         for i in reversed(range(0,len(texto))):
             if texto[i] == " ":
@@ -86,7 +86,7 @@ def changeDisplayLed(texto):
     else:
         lcd.lcd_display(spaceText(texto[:len(texto)]))
 
-def ledStatusChange(ledCode):
+def ledStatusChange(ledCode = 0):
     try:
         changeDisplayLed(status[ledCode])
         if ledCode == 0:
@@ -113,7 +113,7 @@ try:
         numeroSerie = input()
         changeRGBLed(0, 0, 0)
         sensorMAC = getMAC()
-        url = "http://"+ config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
+        url = "http://"+ config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC               
         if code != -2:
             lcd.lcd_display(spaceText(config['SERVER_PROCESSING']))
 
@@ -127,10 +127,11 @@ try:
                 print("Connection Exception")
                 print(e)
                 code = -2
+
             if resp.status_code != 200 or code == -2:
-                print("Servidor returned code " + resp.status_code)
+                print("Servidor returned code " + str(resp.status_code))
             else:
-                print("Servidor returned code " + resp.status_code)
+                print("Servidor returned code " + str(resp.status_code))
                 print('Success: ' + str(resp.text))
                 jsonResp = json.loads(str(resp.text))
                 resultCode = int(jsonResp["Resultado"])
