@@ -116,6 +116,8 @@ class lcd:
          self.lcd_clear()
          self.lcd_display_string(string_1, 1)
          self.lcd_display_string(string_2, 2)
+         print(string_1 + string_2)
       else:
          self.lcd_clear()
          self.lcd_display_string(string_1, 1)
+         print(string_1)
