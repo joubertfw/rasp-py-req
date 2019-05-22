@@ -41,13 +41,12 @@ def getMAC(interface=config['INTERFACE_NAME']):
 
 
 def getIP():
-    try:                
-        host_ip = socket.gethostbyname(socket.gethostname()) 
-        print(type(host_ip))
+    try:
+        host_ip = socket.gethostbyname(socket.gethostname())
     except Exception as e:
-        host_ip = "0.0.0.0"        
+        host_ip = "0.0.0.0"
         print("Exception in function getIP")
-        print(e)        
+        print(e)
     return host_ip
 
 def changeRGBLed(r, g, b):
