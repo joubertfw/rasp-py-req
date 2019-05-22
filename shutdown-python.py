@@ -10,6 +10,9 @@ GPIO.setup(17, GPIO.IN,pull_up_down=GPIO.PUD_UP)
 
 lcd = lcddriver.lcd()
 
+def spaceText(texto = ' '):
+    return " " * int((16 - len(texto))/2) + texto
+
 while True:
     #print GPIO.input(17) 
     if(GPIO.input(17) == False):
