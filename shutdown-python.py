@@ -20,6 +20,7 @@ while True:
         lcd.lcd_display(spaceText("DESLIGANDO..."))        
         GPIO.cleanup()
         time.sleep(1)
+        lcd.lcd_clear()
         os.system("sudo shutdown -h now")
         break
     time.sleep(3)
