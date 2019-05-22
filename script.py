@@ -11,9 +11,9 @@ GPIO.setmode(GPIO.BCM)
 lcd = lcddriver.lcd()
 lcd.lcd_clear()
 
-LED1_RED = 17
-LED1_GREEN = 22
-LED1_BLUE = 27
+LED1_RED = 14
+LED1_GREEN = 15
+LED1_BLUE = 18
 
 GPIO.setup(LED1_RED,GPIO.OUT)
 GPIO.output(LED1_RED, 0)
@@ -127,9 +127,6 @@ try:
                 print("Connection Exception")
                 print(e)
                 code = -2
-
-            if resp.status_code != 200 or code == -2:
-                print("Servidor returned code " + str(resp.status_code))
             else:
                 print("Servidor returned code " + str(resp.status_code))
                 print('Success: ' + str(resp.text))
