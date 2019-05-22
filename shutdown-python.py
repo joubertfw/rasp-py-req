@@ -21,6 +21,7 @@ while True:
         GPIO.cleanup()
         time.sleep(1)
         lcd.lcd_clear()
+        lcd.lcd_backlight("off")
         os.system("sudo shutdown -h now")
         break
     time.sleep(3)
