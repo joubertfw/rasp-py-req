@@ -11,9 +11,9 @@ GPIO.setmode(GPIO.BCM)
 lcd = lcddriver.lcd()
 lcd.lcd_clear()
 
-LED1_RED = 13
-LED1_GREEN = 19
-LED1_BLUE = 26
+LED1_RED = 17
+LED1_GREEN = 22
+LED1_BLUE = 27
 
 GPIO.setup(LED1_RED,GPIO.OUT)
 GPIO.output(LED1_RED, 0)
