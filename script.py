@@ -4,6 +4,7 @@ import requests
 from threading import Thread
 import time
 import os
+import socket
 import lcddriver
 
 GPIO.setmode(GPIO.BCM)
@@ -29,14 +30,25 @@ with open('/home/pi/rasp-py-req/config.json', 'r') as f:
 
 code = -1
 
-def getMAC(interface='wlan0'):
+def getMAC(interface=config['INTERFACE_NAME']):
     try:
-        str = open('/sys/class/net/%s/address' %interface).read()
+        str = open(config['INTERFACE_FOLDER'] %interface).read()
     except Exception as e:
         print("Exception in function getMAC")
         print(e)
         str = "00:00:00:00:00:00"
     return str[0:17]
+
+
+def getIP():
+    try:                
+        host_ip = socket.gethostbyname(socket.gethostname()) 
+        print(type(host_ip))
+    except Exception as e:
+        host_ip = "0.0.0.0"        
+        print("Exception in function getIP")
+        print(e)        
+    return host_ip
 
 def changeRGBLed(r, g, b):
     GPIO.output(LED1_RED, r)
@@ -50,7 +62,7 @@ def verifyConnection():
     codeAnterior = code
     while (True):
         if codeAnterior == -2 and code == -1:
-            lcd.lcd_display(spaceText(config['SERVER_READY']), spaceText(''.join(getMAC().split(':'))))
+            lcd.lcd_display(spaceText(config['SERVER_READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
         codeAnterior = code
         try:
             resp = requests.get(url, headers = headers, timeout = 1)
@@ -103,7 +115,7 @@ headers = {"APIkey" : config['SERVER_KEY'] }
 
 lcd.lcd_display(spaceText(config['SERVER_INITIALIZING']))
 time.sleep(5)
-lcd.lcd_display(spaceText(config['SERVER_READY']), spaceText(''.join(getMAC().split(':'))))
+lcd.lcd_display(spaceText(config['SERVER_READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
 
 connThread = Thread(target=verifyConnection, args=[])
 connThread.start()
