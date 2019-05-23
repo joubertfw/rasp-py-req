@@ -121,13 +121,14 @@ connThread.start()
 
 try:
     while (True):
-        numeroSerie = input()
+        numeroSerie = input()        
+        if (numeroSerie == "@@MCMEXIT@@"):
+            quit()
         changeRGBLed(0, 0, 0)
         sensorMAC = getMAC()
-        url = "http://"+ config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC               
+        url = "http://"+ config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
         if code != -2:
             lcd.lcd_display(spaceText(config['SERVER_PROCESSING']))
-
             try:
                 resp = requests.post(url, headers = headers, timeout = 10)
             except requests.exceptions.Timeout:
@@ -146,6 +147,8 @@ try:
                 ledStatusChange(resultCode)
                 if resultCode == 1:
                     numeroSerieNovo = input()
+                    if (numeroSerieNovo ==  "@@MCMEXIT@@"):
+                        quit()
                     url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
                     resp = requests.post(url, headers = headers)
                     if resp.status_code != 200:
