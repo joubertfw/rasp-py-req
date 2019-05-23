@@ -14,10 +14,10 @@ def spaceText(texto = ' '):
     return " " * int((16 - len(texto))/2) + texto
 
 while True:
-    #print GPIO.input(17) 
+    #print GPIO.input(17)
     if(GPIO.input(17) == False):
-        lcd.lcd_clear()        
-        lcd.lcd_display(spaceText("DESLIGANDO..."))        
+        lcd.lcd_clear()
+        lcd.lcd_display(spaceText("DESLIGANDO..."))
         GPIO.cleanup()
         time.sleep(1)
         lcd.lcd_clear()
