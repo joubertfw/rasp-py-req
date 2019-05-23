@@ -164,3 +164,4 @@ finally:
     GPIO.cleanup()
     lcd.lcd_clear()
     lcd.lcd_backlight("off")
+    quit()
