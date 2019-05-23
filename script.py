@@ -123,7 +123,7 @@ try:
     while (True):
         numeroSerie = input()        
         if (numeroSerie == "@@MCMEXIT@@"):
-            quit()
+            break
         changeRGBLed(0, 0, 0)
         sensorMAC = getMAC()
         url = "http://"+ config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
@@ -148,7 +148,7 @@ try:
                 if resultCode == 1:
                     numeroSerieNovo = input()
                     if (numeroSerieNovo ==  "@@MCMEXIT@@"):
-                        quit()
+                        break
                     url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
                     resp = requests.post(url, headers = headers)
                     if resp.status_code != 200:
@@ -164,4 +164,4 @@ finally:
     GPIO.cleanup()
     lcd.lcd_clear()
     lcd.lcd_backlight("off")
-    quit()
+    os._exit(1)
