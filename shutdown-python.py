@@ -17,6 +17,7 @@ while True:
     #print GPIO.input(17)
     if(GPIO.input(17) == False):
         lcd.lcd_clear()
+        lcd.lcd_backlight("on")
         lcd.lcd_display(spaceText("DESLIGANDO..."))
         GPIO.cleanup()
         time.sleep(1)
