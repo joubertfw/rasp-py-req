@@ -121,9 +121,11 @@ connThread.start()
 
 try:
     while (True):
-        numeroSerie = input()        
+        numeroSerie = input()
         if (numeroSerie == "@@MCMEXIT@@"):
             break
+        if (numeroSerie == "@@MCMSHUT@@"):
+            os.system("sudo shutdown -h now")
         changeRGBLed(0, 0, 0)
         sensorMAC = getMAC()
         url = "http://"+ config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
@@ -149,6 +151,8 @@ try:
                     numeroSerieNovo = input()
                     if (numeroSerieNovo ==  "@@MCMEXIT@@"):
                         break
+                    elif (numeroSerieNovo ==  "@@MCMSHUT@@"):
+                        os.system("sudo shutdown -h now")
                     url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
                     resp = requests.post(url, headers = headers)
                     if resp.status_code != 200:
@@ -165,3 +169,4 @@ finally:
     lcd.lcd_clear()
     lcd.lcd_backlight("off")
     os._exit(1)
+    
