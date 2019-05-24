@@ -125,6 +125,12 @@ try:
         if (numeroSerie == "@@MCMEXIT@@"):
             break
         if (numeroSerie == "@@MCMSHUT@@"):
+            lcd.lcd_clear()
+            GPIO.cleanup()
+            lcd.lcd_display(spaceText("DESLIGANDO..."))
+            time.sleep(1)
+            lcd.lcd_clear()
+            lcd.lcd_backlight("off")
             os.system("sudo shutdown -h now")
         changeRGBLed(0, 0, 0)
         sensorMAC = getMAC()
@@ -152,6 +158,12 @@ try:
                     if (numeroSerieNovo ==  "@@MCMEXIT@@"):
                         break
                     elif (numeroSerieNovo ==  "@@MCMSHUT@@"):
+                        lcd.lcd_clear()
+                        GPIO.cleanup()
+                        lcd.lcd_display(spaceText("DESLIGANDO..."))
+                        time.sleep(1)
+                        lcd.lcd_clear()
+                        lcd.lcd_backlight("off")
                         os.system("sudo shutdown -h now")
                     url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
                     resp = requests.post(url, headers = headers)
