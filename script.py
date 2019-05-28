@@ -57,31 +57,39 @@ def changeRGBLed(r, g, b):
 def verifyConnection():
     url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?echo=ConnectionTest"
     headers = {"APIkey" : config['SERVER_KEY'] }
+    counterConn = 0
+    counterServ = 0
     global code
     codeAnterior = code
     while (True):
         if codeAnterior == -2 and code == -1:
             lcd.lcd_display(spaceText(config['SERVER_READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
+            counterConn = 0
+            counterServ = 0
         codeAnterior = code
         try:
             resp = requests.get(url, headers = headers, timeout = 1)
             resp.raise_for_status()
             if resp.status_code != 200:
                 code = -2
-                lcd.lcd_display(spaceText(config['SERVER_DOWN']))
-                changeRGBLed(1, 0, 0)
-                time.sleep(1.0)
-                changeRGBLed(0, 0, 0)
+                counterServ += 1
+                if counterServ >= 3:
+                    lcd.lcd_display(spaceText(config['SERVER_DOWN']))
+                    changeRGBLed(1, 0, 0)
+                    time.sleep(1.0)
+                    changeRGBLed(0, 0, 0)
             else:
                 code = -1
         except Exception as e:
             print(e)
             code = -2
-            lcd.lcd_display(spaceText(config['SERVER_NOCONN']))
-            changeRGBLed(1, 0, 0)
-            time.sleep(1.0)
-            changeRGBLed(0, 0, 0)
-        time.sleep(2.0)
+            counterConn += 1
+            if counterConn >= 3:
+                lcd.lcd_display(spaceText(config['SERVER_NOCONN']))
+                changeRGBLed(1, 0, 0)
+                time.sleep(1.0)
+                changeRGBLed(0, 0, 0)
+        time.sleep(3.0)
         if code == -2:
             lcd.lcd_clear()
 
