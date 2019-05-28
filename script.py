@@ -6,6 +6,7 @@ import time
 import os
 import socket
 import lcddriver
+import subprocess
 
 GPIO.setmode(GPIO.BCM)
 
@@ -39,7 +40,6 @@ def getMAC(interface=config['INTERFACE_NAME']):
         str = "00:00:00:00:00:00"
     return str[0:17]
 
-
 def getIP():
     try:
         host_ip = socket.gethostbyname(socket.gethostname())
@@ -49,6 +49,22 @@ def getIP():
         print(e)
     return host_ip
 
+def getSSID():
+    try:
+        ssid = str(subprocess.check_output(['iwgetid','-r']))
+    except Exception as e:
+        print("Exception in function getSSID")
+        print(e)
+        ssid = "........."
+    return ssid[2:len(ssid)-3]
+
+def showInfo():
+    lcd.lcd_display(spaceText("IP " + getIP()), spaceText("MAC " + ''.join(getMAC().split(':'))))
+    time.sleep(4.0)
+    lcd.lcd_display(spaceText("HOST " + socket.gethostname()), spaceText("WIFI " + getSSID()))
+    time.sleep(4.0)
+    lcd.lcd_display(spaceText(config['SERVER_READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
+
 def changeRGBLed(r, g, b):
     GPIO.output(LED1_RED, r)
     GPIO.output(LED1_GREEN, g)
@@ -57,38 +73,30 @@ def changeRGBLed(r, g, b):
 def verifyConnection():
     url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?echo=ConnectionTest"
     headers = {"APIkey" : config['SERVER_KEY'] }
-    counterConn = 0
-    counterServ = 0
     global code
     codeAnterior = code
     while (True):
         if codeAnterior == -2 and code == -1:
             lcd.lcd_display(spaceText(config['SERVER_READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
-            counterConn = 0
-            counterServ = 0
         codeAnterior = code
         try:
-            resp = requests.get(url, headers = headers, timeout = 1)
+            resp = requests.get(url, headers = headers, timeout = 5)
             resp.raise_for_status()
             if resp.status_code != 200:
                 code = -2
-                counterServ += 1
-                if counterServ >= 3:
-                    lcd.lcd_display(spaceText(config['SERVER_DOWN']))
-                    changeRGBLed(1, 0, 0)
-                    time.sleep(1.0)
-                    changeRGBLed(0, 0, 0)
+                lcd.lcd_display(spaceText(config['SERVER_DOWN']))
+                changeRGBLed(1, 0, 0)
+                time.sleep(2.0)
+                changeRGBLed(0, 0, 0)
             else:
                 code = -1
         except Exception as e:
             print(e)
             code = -2
-            counterConn += 1
-            if counterConn >= 3:
-                lcd.lcd_display(spaceText(config['SERVER_NOCONN']))
-                changeRGBLed(1, 0, 0)
-                time.sleep(1.0)
-                changeRGBLed(0, 0, 0)
+            lcd.lcd_display(spaceText(config['SERVER_NOCONN']))
+            changeRGBLed(1, 0, 0)
+            time.sleep(2.0)
+            changeRGBLed(0, 0, 0)
         time.sleep(3.0)
         if code == -2:
             lcd.lcd_clear()
@@ -132,7 +140,7 @@ try:
         numeroSerie = input()
         if (numeroSerie == "@@MCMEXIT@@"):
             break
-        if (numeroSerie == "@@MCMSHUT@@"):
+        elif (numeroSerie == "@@MCMSHUT@@"):
             lcd.lcd_clear()
             GPIO.cleanup()
             lcd.lcd_display(spaceText("DESLIGANDO..."))
@@ -140,47 +148,53 @@ try:
             lcd.lcd_clear()
             lcd.lcd_backlight("off")
             os.system("sudo shutdown -h now")
-        changeRGBLed(0, 0, 0)
-        sensorMAC = getMAC()
-        url = "http://"+ config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
-        if code != -2:
-            lcd.lcd_display(spaceText(config['SERVER_PROCESSING']))
-            try:
-                resp = requests.post(url, headers = headers, timeout = 10)
-            except requests.exceptions.Timeout:
-                code = -3
-                changeRGBLed(1, 0, 0)
-                lcd.lcd_display(spaceText(config['SERVER_TRYAGAIN']))
-            except Exception as e:
-                print("Connection Exception")
-                print(e)
-                code = -2
-            else:
-                print("Servidor returned code " + str(resp.status_code))
-                print('Success: ' + str(resp.text))
-                jsonResp = json.loads(str(resp.text))
-                resultCode = int(jsonResp["Resultado"])
-                ledStatusChange(resultCode)
-                if resultCode == 1:
-                    numeroSerieNovo = input()
-                    if (numeroSerieNovo ==  "@@MCMEXIT@@"):
-                        break
-                    elif (numeroSerieNovo ==  "@@MCMSHUT@@"):
-                        lcd.lcd_clear()
-                        GPIO.cleanup()
-                        lcd.lcd_display(spaceText("DESLIGANDO..."))
-                        time.sleep(1)
-                        lcd.lcd_clear()
-                        lcd.lcd_backlight("off")
-                        os.system("sudo shutdown -h now")
-                    url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
-                    resp = requests.post(url, headers = headers)
-                    if resp.status_code != 200:
-                        code = -1
-                    else:
-                        jsonResp = json.loads(str(resp.text))
-                        resultCode = int(jsonResp["Resultado"])
-                        ledStatusChange(resultCode)
+        elif (numeroSerie == "@@MCMINFO@@"):
+            showInfo()
+        else:
+            changeRGBLed(0, 0, 0)
+            sensorMAC = getMAC()
+            url = "http://"+ config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&sensorMAC=" + sensorMAC
+            if code != -2:
+                lcd.lcd_display(spaceText(config['SERVER_PROCESSING']))
+                try:
+                    resp = requests.post(url, headers = headers, timeout = 10)
+                except requests.exceptions.Timeout:
+                    code = -3
+                    changeRGBLed(1, 0, 0)
+                    lcd.lcd_display(spaceText(config['SERVER_TRYAGAIN']))
+                except Exception as e:
+                    print("Connection Exception")
+                    print(e)
+                    code = -2
+                else:
+                    print("Servidor returned code " + str(resp.status_code))
+                    print('Success: ' + str(resp.text))
+                    jsonResp = json.loads(str(resp.text))
+                    resultCode = int(jsonResp["Resultado"])
+                    ledStatusChange(resultCode)
+                    if resultCode == 1:
+                        numeroSerieNovo = input()
+                        if (numeroSerieNovo ==  "@@MCMEXIT@@"):
+                            break
+                        elif (numeroSerieNovo ==  "@@MCMSHUT@@"):
+                            lcd.lcd_clear()
+                            GPIO.cleanup()
+                            lcd.lcd_display(spaceText("DESLIGANDO..."))
+                            time.sleep(1)
+                            lcd.lcd_clear()
+                            lcd.lcd_backlight("off")
+                            os.system("sudo shutdown -h now")
+                        elif (numeroSerieNovo ==  "@@MCMINFO@@"):
+                            showInfo()
+                        else:
+                            url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?numeroSerie=" + numeroSerie + "&numeroSerieNovo=" + numeroSerieNovo + "&sensorMAC=" + sensorMAC
+                            resp = requests.post(url, headers = headers)
+                            if resp.status_code != 200:
+                                code = -1
+                            else:
+                                jsonResp = json.loads(str(resp.text))
+                                resultCode = int(jsonResp["Resultado"])
+                                ledStatusChange(resultCode)
 except Exception as e:
     print("Except in main code: ")
     print(e)
