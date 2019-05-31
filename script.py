@@ -59,6 +59,8 @@ def getSSID():
     return ssid[2:len(ssid)-3]
 
 def showInfo():
+    lcd.lcd_display(spaceText("VERSAO " + config['VERSION']))
+    time.sleep(4.0)
     lcd.lcd_display(spaceText("IP " + getIP()), spaceText("MAC " + ''.join(getMAC().split(':'))))
     time.sleep(4.0)
     lcd.lcd_display(spaceText("HOST " + socket.gethostname()), spaceText("WIFI " + getSSID()))
