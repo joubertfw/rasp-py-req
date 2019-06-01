@@ -3,7 +3,7 @@
         "VERSION": "0.1.0",
         "INTERFACE_NAME": "wlan0",
         "INTERFACE_FOLDER": "/sys/class/net/%s/address",
-        "SERVER_IP": "10.0.0.225",
+        "SERVER_IP": "172.16.10.243",
         "SERVER_KEY": "!@##@!c3p3d1!@##@!",
         "SERVER_READY": "OK",
         "SERVER_PROCESSING": "PROCESSANDO",
