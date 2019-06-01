@@ -119,11 +119,11 @@ def ledStatusChange(ledCode = 0):
     try:
         changeDisplayLed(status[ledCode])
         if ledCode == 0:
-            changeRGBLed(0, 1, 0)
+            changeRGBLed(1, 0, 0)
         elif ledCode == 1:
             changeRGBLed(0, 0, 1)
         elif ledCode in [2, 3, 4, 5, 6, 7, 8, 9, 10]:
-            changeRGBLed(1, 0, 0)
+            changeRGBLed(0, 1, 0)
     except Exception as e:
         print("Except in function ledStatusChange: ")
         print(e)
