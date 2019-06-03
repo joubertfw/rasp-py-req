@@ -126,6 +126,10 @@ def selectDB():
         to_json = json.dumps(linha)
         print(to_json)
 
+def selectDBFormated():
+    cursor.execute("SELECT * FROM SerialNumbers;")
+    r = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in cursor.fetchall()]
+    print(r)
 
 def sendBufferData():
     global buffer

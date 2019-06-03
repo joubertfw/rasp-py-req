@@ -1,11 +1,12 @@
 {
     "CONFIG": {
-        "VERSION": "0.1.0",
+        "VERSION": "0.2.0",
         "INTERFACE_NAME": "wlan0",
         "INTERFACE_FOLDER": "/sys/class/net/%s/address",
         "SERVER_IP": "10.0.0.225",
         "SERVER_URL": "http://{}/MMHWebAPI/api/Produto?numeroSerie={}&sensorMAC={}",
         "SERVER_URL_BIND": "http://{}/MMHWebAPI/api/Produto?numeroSerie={}&numeroSerieNovo={}&sensorMAC={}",
+        "SERVER_URL_ECHO": "http://{}/MMHWebAPI/api/Produto?echo=ConnectionTest",
         "SERVER_KEY": "!@##@!c3p3d1!@##@!",
         "SERVER_READY": "OK",
         "SERVER_PROCESSING": "PROCESSANDO",
