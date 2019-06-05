@@ -12,15 +12,15 @@ import sqlite3
 
 GPIO.setmode(GPIO.BCM)
 
-conn = sqlite3.connect('raspSN.db')
+conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
 cursor = conn.cursor()
 
 lcd = lcddriver.lcd()
 lcd.lcd_clear()
 
-LED1_RED = 14
+LED1_RED = 18
 LED1_GREEN = 15
-LED1_BLUE = 18
+LED1_BLUE = 14
 
 GPIO.setup(LED1_RED,GPIO.OUT)
 GPIO.output(LED1_RED, 0)
@@ -32,11 +32,12 @@ GPIO.output(LED1_BLUE, 0)
 with open('/home/pi/rasp-py-req/config.json', 'r') as f:
     jsonFile = json.load(f)
     config = jsonFile['CONFIG']
+    server = jsonFile['SERVER']
     status = jsonFile['STATUS']
 
 code = -1
-buffer = []
-headers = {"APIkey" : config['SERVER_KEY'] }
+headers = {"APIkey" : server['KEY'] }
+tipo = ""
 
 def getMAC(interface=config['INTERFACE_NAME']):
     try:
@@ -65,14 +66,47 @@ def getSSID():
         ssid = "........."
     return ssid[2:len(ssid)-3]
 
+def setTime():
+    url = server['TIME'].format(server['IP'], getMAC())
+    try:
+        resp = requests.get(url, headers = headers)
+    except Exception as e:
+        print("Exception in getTime")
+        print (e)
+    else:
+        print(resp.text)
+
+def getName():
+    url = server['NAME'].format(server['IP'], getMAC())
+    try:
+        resp = requests.get(url, headers = headers)
+    except Exception as e:
+        print("Exception in getName")
+        print (e)
+        return "Sensor"
+    else:
+        jsonResp = json.loads(str(resp.text))
+        return jsonResp
+
+def setType():
+    global tipo
+    url = server['TYPE'].format(server['IP'], getMAC())
+    try:
+        resp = requests.get(url, headers = headers)
+    except Exception as e:
+        print("Exception in getType")
+        print (e)
+    else:
+        tipo = resp.text
+
 def showInfo():
-    lcd.lcd_display(spaceText("VERSAO " + config['VERSION']))
+    lcd.lcd_display(spaceText("VERSAO " + config['VERSION']), spaceText("NOME " + getName()))
     time.sleep(4.0)
     lcd.lcd_display(spaceText("IP " + getIP()), spaceText("MAC " + ''.join(getMAC().split(':'))))
     time.sleep(4.0)
     lcd.lcd_display(spaceText("HOST " + socket.gethostname()), spaceText("WIFI " + getSSID()))
     time.sleep(4.0)
-    lcd.lcd_display(spaceText(config['SERVER_READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
+    lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
 
 def shutdown():
     lcd.lcd_clear()
@@ -132,17 +166,7 @@ def selectDBFormated():
     print(r)
 
 def sendBufferData():
-    global buffer
-    while (len(buffer) > 0):
-        try:
-            url = config['SERVER_URL'].format(config['SERVER_IP'], serialNumber, getMAC())
-            resp = requests.post(url, headers = headers, timeout = 2)
-        except:
-            return False
-        buffer.pop()
-        print(buffer)
-        time.sleep(2.0)
-    return True
+    print("NADA")
 
 def sendInput(inputText, newSerieNumber = None):
     global buffer
@@ -154,11 +178,11 @@ def sendInput(inputText, newSerieNumber = None):
         showInfo()
     else:
         sensorMAC = getMAC()
-        lcd.lcd_display(spaceText(config['SERVER_PROCESSING']))
+        lcd.lcd_display(spaceText(config['PROCESSING']))
         if newSerieNumber == None:
-            url = config['SERVER_URL'].format(config['SERVER_IP'], inputText, sensorMAC)
+            url = server['SEND'].format(server['IP'], inputText, sensorMAC)
         else:
-            url = config['SERVER_URL_BIND'].format(config['SERVER_IP'], inputText, newSerieNumber, sensorMAC)
+            url = server['BIND'].format(server['IP'], inputText, newSerieNumber, sensorMAC)
 
         try:
             resp = requests.post(url, headers = headers, timeout = 2)
@@ -176,11 +200,11 @@ def sendInput(inputText, newSerieNumber = None):
 
             if resultCode == 1:
                 numeroSerieNovo = input()
-                sendInput(inputText, numeroSerieNovo)
+                sendInput(inputText = inputText, newSerieNumber = numeroSerieNovo)
     return True
 
 def verifyConnection():
-    url = "http://" + config['SERVER_IP'] + "/MMHWebAPI/api/Produto?echo=ConnectionTest"
+    url = server['ECHO'].format(server['IP'])
     global code
     global buffer
     codeAnterior = code
@@ -216,9 +240,9 @@ def verifyConnection():
         if code == -2:
             lcd.lcd_clear()
 
-lcd.lcd_display(spaceText(config['SERVER_INITIALIZING']))
+lcd.lcd_display(spaceText(config['INITIALIZING']))
 time.sleep(4)
-lcd.lcd_display(spaceText(config['SERVER_READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
+lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
 
 connThread = Thread(target = verifyConnection, args = [], daemon = True)
 connThread.start()

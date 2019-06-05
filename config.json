@@ -3,17 +3,21 @@
         "VERSION": "0.2.0",
         "INTERFACE_NAME": "wlan0",
         "INTERFACE_FOLDER": "/sys/class/net/%s/address",
-        "SERVER_IP": "10.0.0.225",
-        "SERVER_URL": "http://{}/MMHWebAPI/api/Produto?numeroSerie={}&sensorMAC={}",
-        "SERVER_URL_BIND": "http://{}/MMHWebAPI/api/Produto?numeroSerie={}&numeroSerieNovo={}&sensorMAC={}",
-        "SERVER_URL_ECHO": "http://{}/MMHWebAPI/api/Produto?echo=ConnectionTest",
-        "SERVER_KEY": "!@##@!c3p3d1!@##@!",
-        "SERVER_READY": "OK",
-        "SERVER_PROCESSING": "PROCESSANDO",
-        "SERVER_DOWN": "SEM SERVIDOR",
-        "SERVER_NOCONN": "SEM REDE",
-        "SERVER_INITIALIZING": "INICIALIZANDO",
-        "SERVER_TRYAGAIN": "TENTE NOVAMENTE"
+        "READY": "OK",
+        "PROCESSING": "PROCESSANDO",
+        "INITIALIZING": "INICIALIZANDO",
+        "TRYAGAIN": "TENTE NOVAMENTE"
+    },
+
+    "SERVER": {
+        "IP": "172.16.10.243",
+        "KEY": "!@##@!c3p3d1!@##@!",
+        "SEND": "http://{}/MMHWebAPI/api/Produto/RegistrarNaRota?numeroSerie={}&sensorMAC={}",
+        "BIND": "http://{}/MMHWebAPI/api/Produto/AmarrarProduto?numeroSerie={}&numeroSerieNovo={}&sensorMAC={}",
+        "ECHO": "http://{}/MMHWebAPI/api/Produto/GetEcho?echo=ConnectionTest",
+        "NAME": "http://{}/MMHWebAPI/api/Produto/GetNome?sensorMAC={}",
+        "TYPE": "http://{}/MMHWebAPI/api/Produto/GetTipo?sensorMAC={}",
+        "TIME": "http://{}/MMHWebAPI/api/Produto/GetTime?sensorMAC={}"
     },
     
     "STATUS": [
