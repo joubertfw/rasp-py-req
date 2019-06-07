@@ -3,7 +3,7 @@ import json
 import requests
 from threading import Thread
 import time
-import datetime
+from datetime import datetime
 import os
 import socket
 import lcddriver
@@ -74,7 +74,10 @@ def setTime():
         print("Exception in getTime")
         print (e)
     else:
-        print(resp.text)
+        jsonResp = json.loads(str(resp.text))
+        currentDate = datetime.strptime(jsonResp[:len(jsonResp) - 7], '%Y-%m-%dT%H:%M:%S.%f')
+        # os.system("sudo date -s \"{}\"".format(str(currentDate - resp.elapsed)))
+        subprocess.check_call(["sudo", "date", "-s", str(currentDate - resp.elapsed)], stdout = subprocess.DEVNULL)
 
 def getName():
     url = server['NAME'].format(server['IP'], getMAC())
@@ -97,7 +100,7 @@ def setType():
         print("Exception in getType")
         print (e)
     else:
-        tipo = resp.text
+        tipo = json.loads(str(resp.text))
 
 def showInfo():
     lcd.lcd_display(spaceText("VERSAO " + config['VERSION']), spaceText("NOME " + getName()))
@@ -147,12 +150,12 @@ def ledStatusChange(ledCode = 0):
         print("Except in function ledStatusChange: ")
         print(e)
 
-def insertDB(Serial1, Serial2 = None, Enviado = False, DataCad = datetime.datetime.now()):
-    cursor.execute("INSERT INTO SerialNumbers (Serial1, Serial2, Enviado, DataCad) VALUES (?, ?, ?, ?);", (Serial1, Serial2, Enviado, DataCad))
+def insertDB(NumeroSerie1, NumeroSerie2 = None, Data = datetime.now()):
+    cursor.execute("INSERT INTO SerialNumbers (NumeroSerie1, NumeroSerie2, Data) VALUES (?, ?, ?);", (NumeroSerie1, NumeroSerie2, Data))
     conn.commit()
 
 def selectDB():
-    dados = cursor.execute("SELECT * FROM SerialNumbers as (Id, Serial1, Serial2, Enviado, DataCad);")
+    dados = cursor.execute("SELECT * FROM SerialNumbers as (Id, NumeroSerie1, NumeroSerie2,  Data);")
     print(dados)
     print(type(dados))
     for linha in cursor.fetchall():
