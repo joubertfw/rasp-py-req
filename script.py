@@ -211,10 +211,10 @@ def verifyConnection():
     global code
     global buffer
     codeAnterior = code
+    countConn = 0
     while (True):
         if codeAnterior == -2 and code == -1:
-            print("a")
-            # lcd.lcd_display(spaceText(config['SERVER_READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
+            print("Conectado 1")
             # sendBufferData()
         codeAnterior = code
         try:
@@ -222,26 +222,24 @@ def verifyConnection():
             resp.raise_for_status()
             if resp.status_code != 200:
                 code = -2
-                # lcd.lcd_display(spaceText(config['SERVER_DOWN']))
-                changeRGBLed(1, 0, 0)
-                time.sleep(2.0)
-                changeRGBLed(0, 0, 0)
+                countConn += 1
             else:
                 code = -1
         except Exception as e:
             print(e)
             code = -2
-            # lcd.lcd_display(spaceText(config['SERVER_NOCONN']))
-            changeRGBLed(1, 0, 0)
-            time.sleep(2.0)
-            changeRGBLed(0, 0, 0)
+            countConn += 1
         else:
+            print("Conectado 2")
+            countConn = 0
             sendBufferData()
             # connThread = Thread(target=sendBufferData, args=[])
             # connThread.start()
-        time.sleep(3.0)
-        if code == -2:
-            lcd.lcd_clear()
+        if countConn == 3:
+            changeRGBLed(1, 0, 0)
+            time.sleep(1.5)
+            changeRGBLed(0, 0, 0)
+            time.sleep(1.5)
 
 lcd.lcd_display(spaceText(config['INITIALIZING']))
 time.sleep(4)
