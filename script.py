@@ -235,11 +235,13 @@ def verifyConnection():
             sendBufferData()
             # connThread = Thread(target=sendBufferData, args=[])
             # connThread.start()
-        if countConn == 3:
+        if countConn >= 3:
             changeRGBLed(1, 0, 0)
             time.sleep(1.5)
             changeRGBLed(0, 0, 0)
             time.sleep(1.5)
+        else:
+            time.sleep(3.0)
 
 lcd.lcd_display(spaceText(config['INITIALIZING']))
 time.sleep(4)
