@@ -1,6 +1,6 @@
 {
     "CONFIG": {
-        "VERSION": "0.2.1",
+        "VERSION": "0.3.0",
         "INTERFACE_NAME": "wlan0",
         "INTERFACE_FOLDER": "/sys/class/net/%s/address",
         "READY": "OK",
@@ -12,6 +12,7 @@
     "SERVER": {
         "IP": "172.16.10.243",
         "KEY": "!@##@!c3p3d1!@##@!",
+        "SYNC": "http://{}/MMHWebAPI/api/Produto/Sincronizar?sensorMAC={}",
         "SEND": "http://{}/MMHWebAPI/api/Produto/RegistrarNaRota?numeroSerie={}&sensorMAC={}",
         "BIND": "http://{}/MMHWebAPI/api/Produto/AmarrarProduto?numeroSerie={}&numeroSerieNovo={}&sensorMAC={}",
         "ECHO": "http://{}/MMHWebAPI/api/Produto/GetEcho?echo=ConnectionTest",
@@ -19,7 +20,7 @@
         "TYPE": "http://{}/MMHWebAPI/api/Produto/GetTipo?sensorMAC={}",
         "TIME": "http://{}/MMHWebAPI/api/Produto/GetTime?sensorMAC={}"
     },
-    
+
     "STATUS": [
         "APROVADO",
         "NECESSARIO AMARRACAO",
