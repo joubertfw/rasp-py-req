@@ -218,7 +218,7 @@ def inputOnline(serialNumber1, serialNumber2 = None):
         ledStatusChange(resultCode)
         if resultCode == 1:
             serialNumber2 = input()
-            sendInputOnline(serialNumber1 = serialNumber1, serialNumber2 = serialNumber2)
+            inputOnline(serialNumber1 = serialNumber1, serialNumber2 = serialNumber2)
 
 def sendInput():
     global offlineMode
