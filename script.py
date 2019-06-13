@@ -243,7 +243,7 @@ def verifyConnection():
     hasOffline = offlineMode
     countConn = countTime = 0
 
-    while (True):        
+    while (True):
         # print("offlineMode: {}".format(offlineMode))
         # print("sync: {}".format(sync))
         if hasOffline == True and offlineMode == False:
