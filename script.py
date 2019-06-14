@@ -35,7 +35,7 @@ with open('/home/pi/rasp-py-req/config.json', 'r') as f:
 offlineMode = False
 sync = False
 headers = {"APIkey" : server['KEY'] }
-tipo = ""
+typeRasp = ""
 
 def getMAC(interface=config['INTERFACE_NAME']):
     try:
@@ -68,12 +68,12 @@ def setTime():
     url = server['TIME'].format(server['IP'], getMAC())
     try:
         resp = requests.get(url, headers = headers)
+        jsonResp = json.loads(str(resp.text))
     except Exception as e:
         print("Exception in getTime")
         print (e)
         return 100, resp
     else:
-        jsonResp = json.loads(str(resp.text))
         currentDate = datetime.strptime(jsonResp[:len(jsonResp) - 7], '%Y-%m-%dT%H:%M:%S.%f')
         # os.system("sudo date -s \"{}\"".format(str(currentDate - resp.elapsed)))
         subprocess.check_call(["sudo", "date", "-s", str(currentDate - resp.elapsed)], stdout = subprocess.DEVNULL)
@@ -83,18 +83,19 @@ def getName():
     url = server['NAME'].format(server['IP'], getMAC())
     try:
         resp = requests.get(url, headers = headers)
+        jsonResp = json.loads(str(resp.text))
     except Exception as e:
         print("Exception in getName")
         print (e)
         return "Sensor"
     else:
-        jsonResp = json.loads(str(resp.text))
         return jsonResp
 
 def dbExecute(querry):
     conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
     cursor = conn.cursor()
-    dados = cursor.execute(querry)
+    cursor.execute(querry)
+    dados = cursor.fetchall()
     conn.commit()
     conn.close()
     return dados
@@ -103,20 +104,26 @@ def setType():
     url = server['TYPE'].format(server['IP'], getMAC())
     try:
         resp = requests.get(url, headers = headers)
+        tipo = json.loads(str(resp.text))
     except Exception as e:
         print("Exception in getType")
         print (e)
     else:
-        tipo = json.loads(str(resp.text))
-        dbExecute("UPDATE TipoRasp SET Tipo = '{}';".format(tipo))
+        if dbExecute("SELECT * FROM TipoRasp"):
+            dbExecute("UPDATE TipoRasp SET Tipo = '{}';".format(tipo))
+        else:
+            dbExecute("INSERT INTO TipoRasp (Tipo) VALUES ('{}');".format(tipo))
 
 def getType():
-    conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
-    cursor = conn.cursor()
-    dados = cursor.execute("SELECT Tipo FROM TipoRasp;")
-    data = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in cursor.fetchall()]
-    conn.close()
-    return str(data[0]['Tipo'])
+    global typeRasp
+    if typeRasp == "":
+        conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
+        cursor = conn.cursor()
+        dados = cursor.execute("SELECT Tipo FROM TipoRasp;")
+        data = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in cursor.fetchall()]
+        typeRasp = data[0]['Tipo']
+        conn.close()
+    return typeRasp
 
 def showInfo():
     lcd.lcd_display(spaceText("VERSAO " + config['VERSION']), spaceText("NOME " + getName()))
@@ -191,7 +198,6 @@ def sendBuffer():
     except Exception as e:
         print(e)
     else:
-        print("BUFFER OK")
         print(resp.elapsed)
         dbExecute("DELETE FROM SerialNumbers;")
 
@@ -206,24 +212,24 @@ def inputOnline(serialNumber1, serialNumber2 = None):
         resp = requests.post(url, headers = headers, timeout = 2)
         if resp.status_code != 200:
             lcd.lcd_display(spaceText(config['TRYAGAIN']))
+        else:
+            jsonResp = json.loads(str(resp.text))
+            resultCode = int(jsonResp["Resultado"])
+            ledStatusChange(resultCode)
+            if resultCode == 1:
+                serialNumber2 = input()
+                inputOnline(serialNumber1 = serialNumber1, serialNumber2 = serialNumber2)
     except Exception as e:
         print("Connection Exception")
         print(e)
         lcd.lcd_display(spaceText(config['TRYAGAIN']))
-    else:
-        print("Servidor returned code " + str(resp.status_code))
-        print('Success: ' + str(resp.text))
-        jsonResp = json.loads(str(resp.text))
-        resultCode = int(jsonResp["Resultado"])
-        ledStatusChange(resultCode)
-        if resultCode == 1:
-            serialNumber2 = input()
-            inputOnline(serialNumber1 = serialNumber1, serialNumber2 = serialNumber2)
 
 def sendInput():
     global offlineMode
     inputText = input()
-    if (inputText == "@@MCMEXIT@@"):
+    if sync == True:
+        lcd.lcd_display(spaceText("SINCRONIZANDO"))
+    elif (inputText == "@@MCMEXIT@@"):
          return False
     elif (inputText == "@@MCMSHUT@@"):
         shutdown()
@@ -244,13 +250,13 @@ def verifyConnection():
     countConn = countTime = 0
 
     while (True):
-        # print("offlineMode: {}".format(offlineMode))
-        # print("sync: {}".format(sync))
+        print("offlineMode: {}".format(offlineMode))
+        print("sync: {}".format(sync))
         if hasOffline == True and offlineMode == False:
-            print("Sincronizando")
+            lcd.lcd_display(spaceText("SINCRONIZANDO"))
             sync = True
             sendBuffer()
-            time.sleep(5)
+            sync = False
         hasOffline = offlineMode
         try:
             if countTime >= 100:
