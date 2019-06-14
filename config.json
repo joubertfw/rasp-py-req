@@ -6,7 +6,8 @@
         "READY": "OK",
         "PROCESSING": "PROCESSANDO",
         "INITIALIZING": "INICIALIZANDO",
-        "TRYAGAIN": "TENTE NOVAMENTE"
+        "TRYAGAIN": "TENTE NOVAMENTE",
+        "SYNCING": "SINCRONIZANDO"
     },
 
     "SERVER": {
@@ -32,6 +33,7 @@
         "NS NOVO DEVE SER DIFERENTE",
         "ERRO AO REGISTRAR",
         "NS NOVO NAO PODE SER DA PLACA",
-        "PRECISA PASSAR PELO REPARO"
+        "PRECISA PASSAR PELO REPARO",
+        "PROCESSADO"
     ]
 }

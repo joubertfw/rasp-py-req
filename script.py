@@ -163,7 +163,7 @@ def changeDisplayLed(texto = ' '):
 def ledStatusChange(ledCode = 0):
     try:
         changeDisplayLed(status[ledCode])
-        if ledCode == 0:
+        if ledCode == 0 or ledCode == 11:
             changeRGBLed(0, 1, 0)
         elif ledCode == 1:
             changeRGBLed(0, 0, 1)
@@ -181,6 +181,7 @@ def inputOffline(serialNumber1):
     else:
         serialNumber2 = None
     dbExecute("INSERT INTO SerialNumbers (NumeroSerie1, NumeroSerie2, Data) VALUES ('{}', '{}', '{}');".format(serialNumber1, serialNumber2, datetime.now()))
+    ledStatusChange(ledCode = 11)
 
 def selectDBFormated():
     conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
@@ -228,7 +229,7 @@ def sendInput():
     global offlineMode
     inputText = input()
     if sync == True:
-        lcd.lcd_display(spaceText("SINCRONIZANDO"))
+        lcd.lcd_display(spaceText(config['SYNCING']))
     elif (inputText == "@@MCMEXIT@@"):
          return False
     elif (inputText == "@@MCMSHUT@@"):
@@ -253,10 +254,11 @@ def verifyConnection():
         print("offlineMode: {}".format(offlineMode))
         print("sync: {}".format(sync))
         if hasOffline == True and offlineMode == False:
-            lcd.lcd_display(spaceText("SINCRONIZANDO"))
+            lcd.lcd_display(spaceText(config['SYNCING']))
             sync = True
             sendBuffer()
             sync = False
+            lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
         hasOffline = offlineMode
         try:
             if countTime >= 100:
