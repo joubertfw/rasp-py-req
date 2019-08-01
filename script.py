@@ -15,9 +15,14 @@ GPIO.setmode(GPIO.BCM)
 lcd = lcddriver.lcd()
 lcd.lcd_clear()
 
-LED1_RED = 18
-LED1_GREEN = 15
-LED1_BLUE = 14
+LED1_RED = 17
+LED1_GREEN = 27
+LED1_BLUE = 22
+
+LED2_RED = 23
+LED2_GREEN = 24
+LED2_BLUE = 25
+BUZZER = 5
 
 GPIO.setup(LED1_RED,GPIO.OUT)
 GPIO.output(LED1_RED, 0)
@@ -25,6 +30,16 @@ GPIO.setup(LED1_GREEN,GPIO.OUT)
 GPIO.output(LED1_GREEN, 0)
 GPIO.setup(LED1_BLUE,GPIO.OUT)
 GPIO.output(LED1_BLUE, 0)
+
+GPIO.setup(LED2_RED, GPIO.OUT)
+GPIO.output(LED2_RED, 0)
+GPIO.setup(LED2_GREEN, GPIO.OUT)
+GPIO.output(LED2_GREEN, 0)
+GPIO.setup(LED2_BLUE, GPIO.OUT)
+GPIO.output(LED2_BLUE, 0)
+
+GPIO.setup(BUZZER, GPIO.OUT)
+GPIO.output(BUZZER, 0)
 
 with open('/home/pi/rasp-py-req/config.json', 'r') as f:
     jsonFile = json.load(f)
@@ -34,6 +49,7 @@ with open('/home/pi/rasp-py-req/config.json', 'r') as f:
 
 offlineMode = False
 sync = False
+high = True
 headers = {"APIkey" : server['KEY'] }
 typeRasp = ""
 
@@ -143,10 +159,22 @@ def shutdown():
     lcd.lcd_backlight("off")
     os.system("sudo shutdown -h now")
 
+def turnBuzzer():
+    if(high):
+        GPIO.output(BUZZER, 1)
+    time.sleep(0.3)
+    GPIO.output(BUZZER, 0)
+
 def changeRGBLed(r, g, b):
     GPIO.output(LED1_RED, r)
     GPIO.output(LED1_GREEN, g)
     GPIO.output(LED1_BLUE, b)
+    # turnBuzzer()
+
+def changeRGBLed2(r, g, b):
+    GPIO.output(LED2_RED, r)
+    GPIO.output(LED2_GREEN, g)
+    GPIO.output(LED2_BLUE, b)
 
 def spaceText(texto = ' '):
     return " " * int((16 - len(texto))/2) + texto
@@ -210,7 +238,7 @@ def inputOnline(serialNumber1, serialNumber2 = None):
     else:
         url = server['BIND'].format(server['IP'], serialNumber1, serialNumber2, sensorMAC)
     try:
-        resp = requests.post(url, headers = headers, timeout = 2)
+        resp = requests.post(url, headers = headers, timeout = 10)
         if resp.status_code != 200:
             lcd.lcd_display(spaceText(config['TRYAGAIN']))
         else:
@@ -227,7 +255,9 @@ def inputOnline(serialNumber1, serialNumber2 = None):
 
 def sendInput():
     global offlineMode
+    global high
     inputText = input()
+    turnBuzzer()
     if sync == True:
         lcd.lcd_display(spaceText(config['SYNCING']))
     elif (inputText == "@@MCMEXIT@@"):
@@ -236,6 +266,8 @@ def sendInput():
         shutdown()
     elif (inputText == "@@MCMINFO@@"):
         showInfo()
+    elif (inputText == "@@MCMVOL@@"):
+        high = not high
     else:
         if offlineMode == True:
             inputOffline(serialNumber1 = inputText)
@@ -249,6 +281,7 @@ def verifyConnection():
     global sync
     hasOffline = offlineMode
     countConn = countTime = 0
+    changeRGBLed2(0, 0, 1)
 
     while (True):
         print("offlineMode: {}".format(offlineMode))
@@ -276,11 +309,12 @@ def verifyConnection():
             # print("Conectado")
             countConn = 0
             offlineMode = False
+            changeRGBLed2(0, 0, 1)
         if countConn >= 3:
             offlineMode = True
-            changeRGBLed(1, 0, 0)
+            changeRGBLed2(1, 0, 0)
             time.sleep(0.5)
-            changeRGBLed(0, 0, 0)
+            changeRGBLed2(0, 0, 0)
             time.sleep(0.5)
         else:
             time.sleep(3.0)
