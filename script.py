@@ -108,7 +108,7 @@ def getName():
         return jsonResp
 
 def getStatus():
-    url = server['STATUS'].format(server['IP'], getMAC())
+    url = server['STAT'].format(server['IP'], getMAC())
     try:
         resp = requests.get(url, headers = headers)
         jsonResp = json.loads(str(resp.text))
