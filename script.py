@@ -107,6 +107,17 @@ def getName():
     else:
         return jsonResp
 
+def getStatus():
+    url = server['STATUS'].format(server['IP'], getMAC())
+    try:
+        resp = requests.get(url, headers = headers)
+        jsonResp = json.loads(str(resp.text))
+    except Exception as e:
+        print("Exception in getStatus")
+        print(e)
+    else:
+        return jsonResp
+    
 def dbExecute(querry):
     conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
     cursor = conn.cursor()
