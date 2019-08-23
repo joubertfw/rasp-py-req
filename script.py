@@ -312,8 +312,8 @@ def verifyConnection():
     changeRGBLed2(0, 0, 1)
 
     while (True):
-        #print("offlineMode: {}".format(offlineMode))
-        #print("sync: {}".format(sync))
+        print("offlineMode: {}".format(offlineMode))
+        print("sync: {}".format(sync))
         if hasOffline == True and offlineMode == False:
             lcd.lcd_display(spaceText(config['SYNCING']))
             sync = True
@@ -334,8 +334,8 @@ def verifyConnection():
             print(e)
             countConn += 1
         else:
-            print("getStatus")
             stat = int(getStatus())
+            print("getStatus: {}".format(stat))
             if stat is 1:
                 lcd.lcd_display(spaceText(config['SYNCING']))
                 sync = True
@@ -363,10 +363,6 @@ lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':')))
 
 connThread = Thread(target = verifyConnection, args = [], daemon = True)
 connThread.start()
-
-while True:
-    print(getStatus())
-    time.sleep(2)
 
 try:
     isRunning = True
