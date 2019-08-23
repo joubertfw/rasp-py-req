@@ -9,6 +9,7 @@ import socket
 import lcddriver
 import subprocess
 import sqlite3
+import random
 
 GPIO.setmode(GPIO.BCM)
 
@@ -23,6 +24,13 @@ LED2_RED = 5
 LED2_GREEN = 25
 LED2_BLUE = 24
 BUZZER = 6
+
+def criar(inicio, fim, prevar):
+    prefixo = "243672419"
+    size = len(prefixo) + len(prevar)
+    num = str(random.randint(inicio, fim))
+    num = prefixo + prevar[ : len(prevar) - len(num)] + num
+    return(num[ : size])
 
 GPIO.setup(LED1_RED,GPIO.OUT)
 GPIO.output(LED1_RED, 0)
@@ -49,7 +57,7 @@ with open('/home/pi/rasp-py-req/config.json', 'r') as f:
 
 offlineMode = False
 sync = False
-high = True
+high = False
 headers = {"APIkey" : server['KEY'] }
 typeRasp = ""
 
@@ -91,6 +99,7 @@ def setTime():
         return 100, resp
     else:
         currentDate = datetime.strptime(jsonResp[:len(jsonResp) - 7], '%Y-%m-%dT%H:%M:%S.%f')
+        # print(currentDate)
         # os.system("sudo date -s \"{}\"".format(str(currentDate - resp.elapsed)))
         subprocess.check_call(["sudo", "date", "-s", str(currentDate - resp.elapsed)], stdout = subprocess.DEVNULL)
         return 0, resp
@@ -115,9 +124,10 @@ def getStatus():
     except Exception as e:
         print("Exception in getStatus")
         print(e)
+        return("0")
     else:
         return jsonResp
-    
+
 def dbExecute(querry):
     conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
     cursor = conn.cursor()
@@ -200,6 +210,8 @@ def changeDisplayLed(texto = ' '):
         lcd.lcd_display(spaceText(texto[:len(texto)]))
 
 def ledStatusChange(ledCode = 0):
+    changeRGBLed(0, 0, 0)
+    time.sleep(0.02)
     try:
         changeDisplayLed(status[ledCode])
         if ledCode == 0 or ledCode == 11:
@@ -232,6 +244,7 @@ def selectDBFormated():
     return data
 
 def sendBuffer():
+    print("SINCRONIZANDO")
     url = server['SYNC'].format(server['IP'], getMAC())
     try:
         resp = requests.post(url, headers = headers, timeout = None, json = selectDBFormated())
@@ -267,7 +280,11 @@ def inputOnline(serialNumber1, serialNumber2 = None):
 def sendInput():
     global offlineMode
     global high
-    inputText = input()
+    time.sleep(2.0)
+    aux = criar(333333, 344444, "000000")
+    inputText = aux
+    print("\n" + aux)
+    # inputText = input()
     turnBuzzer()
     if sync == True:
         lcd.lcd_display(spaceText(config['SYNCING']))
@@ -295,8 +312,8 @@ def verifyConnection():
     changeRGBLed2(0, 0, 1)
 
     while (True):
-        print("offlineMode: {}".format(offlineMode))
-        print("sync: {}".format(sync))
+        #print("offlineMode: {}".format(offlineMode))
+        #print("sync: {}".format(sync))
         if hasOffline == True and offlineMode == False:
             lcd.lcd_display(spaceText(config['SYNCING']))
             sync = True
@@ -317,16 +334,25 @@ def verifyConnection():
             print(e)
             countConn += 1
         else:
-            # print("Conectado")
-            countConn = 0
-            offlineMode = False
-            changeRGBLed2(0, 0, 1)
-        if countConn >= 3:
+            print("getStatus")
+            stat = int(getStatus())
+            if stat is 1:
+                lcd.lcd_display(spaceText(config['SYNCING']))
+                sync = True
+                sendBuffer()
+                sync = False
+                lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
+            if stat is not 2:
+                # print("Conectado")
+                countConn = 0
+                offlineMode = False
+                changeRGBLed2(0, 0, 1)
+        if countConn >= 3 or stat is 2:
             offlineMode = True
             changeRGBLed2(1, 0, 0)
-            time.sleep(0.5)
+            time.sleep(4.0)
             changeRGBLed2(0, 0, 0)
-            time.sleep(0.5)
+            time.sleep(1.0)
         else:
             time.sleep(3.0)
 
@@ -337,6 +363,10 @@ lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':')))
 
 connThread = Thread(target = verifyConnection, args = [], daemon = True)
 connThread.start()
+
+while True:
+    print(getStatus())
+    time.sleep(2)
 
 try:
     isRunning = True
