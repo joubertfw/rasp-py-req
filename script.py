@@ -30,6 +30,7 @@ def criar(inicio, fim, prevar):
     size = len(prefixo) + len(prevar)
     num = str(random.randint(inicio, fim))
     num = prefixo + prevar[ : len(prevar) - len(num)] + num
+    time.sleep(1.0)
     return(num[ : size])
 
 GPIO.setup(LED1_RED,GPIO.OUT)
@@ -89,6 +90,7 @@ def getSSID():
     return ssid[2:len(ssid)-3]
 
 def setTime():
+    print("SET TIME")
     url = server['TIME'].format(server['IP'], getMAC())
     try:
         resp = requests.get(url, headers = headers)
@@ -143,7 +145,7 @@ def setType():
         resp = requests.get(url, headers = headers)
         tipo = json.loads(str(resp.text))
     except Exception as e:
-        print("Exception in getType")
+        print("Exception in setType")
         print (e)
     else:
         if dbExecute("SELECT * FROM TipoRasp"):
@@ -154,12 +156,16 @@ def setType():
 def getType():
     global typeRasp
     if typeRasp == "":
-        conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
-        cursor = conn.cursor()
-        dados = cursor.execute("SELECT Tipo FROM TipoRasp;")
-        data = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in cursor.fetchall()]
-        typeRasp = data[0]['Tipo']
-        conn.close()
+        try:
+            conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
+            cursor = conn.cursor()
+            dados = cursor.execute("SELECT Tipo FROM TipoRasp;")
+            data = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in cursor.fetchall()]
+            typeRasp = data[0]['Tipo']
+            conn.close()
+        except Exception as e:
+            print("Exception in getType")
+            print(Exception)
     return typeRasp
 
 def showInfo():
@@ -196,6 +202,17 @@ def changeRGBLed2(r, g, b):
     GPIO.output(LED2_RED, r)
     GPIO.output(LED2_GREEN, g)
     GPIO.output(LED2_BLUE, b)
+
+def blink(r, g, b, led = 1):
+    if led is 1:
+        changeRGBLed(0, 0, 0)
+        time.sleep(1.0)
+        changeRGBLed(r, g, b)
+    else:
+        changeRGBLed2(0, 0, 0)
+        time.sleep(1.0)
+        changeRGBLed2(r, g, b)
+    time.sleep(1.0)
 
 def spaceText(texto = ' '):
     return " " * int((16 - len(texto))/2) + texto
@@ -280,11 +297,10 @@ def inputOnline(serialNumber1, serialNumber2 = None):
 def sendInput():
     global offlineMode
     global high
-    time.sleep(2.0)
     aux = criar(333333, 344444, "000000")
     inputText = aux
     print("\n" + aux)
-    # inputText = input()
+    #inputText = input()
     turnBuzzer()
     if sync == True:
         lcd.lcd_display(spaceText(config['SYNCING']))
@@ -314,6 +330,7 @@ def verifyConnection():
     while (True):
         print("offlineMode: {}".format(offlineMode))
         print("sync: {}".format(sync))
+        stat = int(getStatus())
         if hasOffline == True and offlineMode == False:
             lcd.lcd_display(spaceText(config['SYNCING']))
             sync = True
@@ -322,7 +339,7 @@ def verifyConnection():
             lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
         hasOffline = offlineMode
         try:
-            if countTime >= 100:
+            if countTime >= 30:
                 countTime, resp = setTime()
             else:
                 resp = requests.get(url, headers = headers, timeout = 5)
@@ -334,7 +351,7 @@ def verifyConnection():
             print(e)
             countConn += 1
         else:
-            stat = int(getStatus())
+            #stat = int(getStatus())
             print("getStatus: {}".format(stat))
             if stat is 1:
                 lcd.lcd_display(spaceText(config['SYNCING']))
@@ -347,14 +364,16 @@ def verifyConnection():
                 countConn = 0
                 offlineMode = False
                 changeRGBLed2(0, 0, 1)
-        if countConn >= 3 or stat is 2:
+        if countConn >= 3:
             offlineMode = True
-            changeRGBLed2(1, 0, 0)
-            time.sleep(4.0)
-            changeRGBLed2(0, 0, 0)
-            time.sleep(1.0)
+            blink(1, 0, 0, led = 2)
+            blink(1, 0, 0, led = 2)
+        elif stat is 2:
+            offlineMode = True
+            blink(0, 0, 1, led = 2)
+            blink(0, 0, 1, led = 2)
         else:
-            time.sleep(3.0)
+            time.sleep(2.5)
 
 lcd.lcd_display(spaceText(config['INITIALIZING']))
 setType()
