@@ -330,7 +330,6 @@ def verifyConnection():
     while (True):
         print("offlineMode: {}".format(offlineMode))
         print("sync: {}".format(sync))
-        stat = int(getStatus())
         if hasOffline == True and offlineMode == False:
             lcd.lcd_display(spaceText(config['SYNCING']))
             sync = True
@@ -339,6 +338,7 @@ def verifyConnection():
             lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
         hasOffline = offlineMode
         try:
+            stat = int(getStatus())
             if countTime >= 30:
                 countTime, resp = setTime()
             else:
