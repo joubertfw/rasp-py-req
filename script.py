@@ -59,6 +59,7 @@ with open('/home/pi/rasp-py-req/config.json', 'r') as f:
 offlineMode = False
 sync = False
 high = False
+stat = "0"
 headers = {"APIkey" : server['KEY'] }
 typeRasp = ""
 
@@ -242,14 +243,34 @@ def ledStatusChange(ledCode = 0):
         print(e)
 
 def inputOffline(serialNumber1):
+    sensorMAC = getMAC()
+    tp = getType()
     print("INPUT OFFLINE")
-    if getType() == "AMARR":
+    if tp == "AMARR":
         ledStatusChange(ledCode = 1)
         serialNumber2 = input()
     else:
         serialNumber2 = None
-    dbExecute("INSERT INTO SerialNumbers (NumeroSerie1, NumeroSerie2, Data) VALUES ('{}', '{}', '{}');".format(serialNumber1, serialNumber2, datetime.now()))
-    ledStatusChange(ledCode = 11)
+    if stat is 2:
+        try:
+            resp = requests.post(url, headers = headers, timeout = 10)
+            if resp.status_code != 200:
+                lcd.lcd_display(spaceText(config['TRYAGAIN']))
+            else:
+                if tp == "AMARR":
+                    url = server['BIND'].format(server['IP'], serialNumber1, serialNumber2, sensorMAC)
+                else:
+                    url = server['SEND'].format(server['IP'], serialNumber1, sensorMAC)
+                jsonResp = json.loads(str(resp.text))
+                resultCode = int(jsonResp["Resultado"])
+                if resultCode not in [0, 1, 11]:
+                    dbExecute("INSERT INTO SerialNumbers (NumeroSerie1, NumeroSerie2, Data) VALUES ('{}', '{}', '{}');".format(serialNumber1, serialNumber2, datetime.now()))
+                    ledStatusChange(ledCode = 11)
+                else:
+                    ledStatusChange(resultCode)
+    else:
+        dbExecute("INSERT INTO SerialNumbers (NumeroSerie1, NumeroSerie2, Data) VALUES ('{}', '{}', '{}');".format(serialNumber1, serialNumber2, datetime.now()))
+        ledStatusChange(ledCode = 11)
 
 def selectDBFormated():
     conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
@@ -323,6 +344,7 @@ def verifyConnection():
     url = server['ECHO'].format(server['IP'])
     global offlineMode
     global sync
+    global stat
     hasOffline = offlineMode
     countConn = countTime = 0
     changeRGBLed2(0, 0, 1)
@@ -330,6 +352,7 @@ def verifyConnection():
     while (True):
         print("offlineMode: {}".format(offlineMode))
         print("sync: {}".format(sync))
+        print("stat: {}".format(stat))
         if hasOffline == True and offlineMode == False:
             lcd.lcd_display(spaceText(config['SYNCING']))
             sync = True
@@ -351,8 +374,6 @@ def verifyConnection():
             print(e)
             countConn += 1
         else:
-            #stat = int(getStatus())
-            print("getStatus: {}".format(stat))
             if stat is 1:
                 lcd.lcd_display(spaceText(config['SYNCING']))
                 sync = True
