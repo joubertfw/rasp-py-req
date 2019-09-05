@@ -30,7 +30,7 @@ def criar(inicio, fim, prevar):
     size = len(prefixo) + len(prevar)
     num = str(random.randint(inicio, fim))
     num = prefixo + prevar[ : len(prevar) - len(num)] + num
-    time.sleep(1.0)
+    time.sleep(0.1)
     return(num[ : size])
 
 GPIO.setup(LED1_RED,GPIO.OUT)
@@ -245,29 +245,31 @@ def ledStatusChange(ledCode = 0):
 def inputOffline(serialNumber1):
     sensorMAC = getMAC()
     tp = getType()
+    url = server['SEND'].format(server['IP'], serialNumber1, sensorMAC)
     print("INPUT OFFLINE")
     if tp == "AMARR":
         ledStatusChange(ledCode = 1)
-        serialNumber2 = input()
+        #serialNumber2 = input()
+        serialNumber2 = criar(0, 3333, "000000")
+        print("{} -> {}".format(serialNumber1, serialNumber2))
     else:
         serialNumber2 = None
+
     if stat is 2:
         try:
+            if tp == "AMARR":
+                url = server['BIND'].format(server['IP'], serialNumber1, serialNumber2, sensorMAC)
             resp = requests.post(url, headers = headers, timeout = 10)
-            if resp.status_code != 200:
-                lcd.lcd_display(spaceText(config['TRYAGAIN']))
+            jsonResp = json.loads(str(resp.text))
+            resultCode = int(jsonResp["Resultado"])
+            print("ResultCode: {}".format(resultCode))
+            if resultCode in [6, 8]:
+                dbExecute("INSERT INTO SerialNumbers (NumeroSerie1, NumeroSerie2, Data) VALUES ('{}', '{}', '{}');".format(serialNumber1, serialNumber2, datetime.now()))
+                ledStatusChange(ledCode = 11)
             else:
-                if tp == "AMARR":
-                    url = server['BIND'].format(server['IP'], serialNumber1, serialNumber2, sensorMAC)
-                else:
-                    url = server['SEND'].format(server['IP'], serialNumber1, sensorMAC)
-                jsonResp = json.loads(str(resp.text))
-                resultCode = int(jsonResp["Resultado"])
-                if resultCode not in [0, 1, 11]:
-                    dbExecute("INSERT INTO SerialNumbers (NumeroSerie1, NumeroSerie2, Data) VALUES ('{}', '{}', '{}');".format(serialNumber1, serialNumber2, datetime.now()))
-                    ledStatusChange(ledCode = 11)
-                else:
-                    ledStatusChange(resultCode)
+                ledStatusChange(resultCode)
+        except Exception as e:
+            print(e)
     else:
         dbExecute("INSERT INTO SerialNumbers (NumeroSerie1, NumeroSerie2, Data) VALUES ('{}', '{}', '{}');".format(serialNumber1, serialNumber2, datetime.now()))
         ledStatusChange(ledCode = 11)
@@ -298,6 +300,7 @@ def inputOnline(serialNumber1, serialNumber2 = None):
     if serialNumber2 == None:
         url = server['SEND'].format(server['IP'], serialNumber1, sensorMAC)
     else:
+        print("{} -> {}".format(serialNumber1, serialNumber2))
         url = server['BIND'].format(server['IP'], serialNumber1, serialNumber2, sensorMAC)
     try:
         resp = requests.post(url, headers = headers, timeout = 10)
@@ -308,7 +311,8 @@ def inputOnline(serialNumber1, serialNumber2 = None):
             resultCode = int(jsonResp["Resultado"])
             ledStatusChange(resultCode)
             if resultCode == 1:
-                serialNumber2 = input()
+                serialNumber2 = criar(0, 3333, "000000")
+                #serialNumber2 = input()
                 inputOnline(serialNumber1 = serialNumber1, serialNumber2 = serialNumber2)
     except Exception as e:
         print("Connection Exception")
@@ -318,7 +322,7 @@ def inputOnline(serialNumber1, serialNumber2 = None):
 def sendInput():
     global offlineMode
     global high
-    aux = criar(333333, 344444, "000000")
+    aux = criar(333333, 336666, "000000")
     inputText = aux
     print("\n" + aux)
     #inputText = input()
