@@ -17,20 +17,20 @@ lcd = lcddriver.lcd()
 lcd.lcd_clear()
 
 LED1_RED = 23
-LED1_GREEN = 22
-LED1_BLUE = 17
+LED1_GREEN = 17
+LED1_BLUE = 22
 
-LED2_RED = 5
+LED2_RED = 6
 LED2_GREEN = 25
 LED2_BLUE = 24
-BUZZER = 6
+BUZZER = 5
 
 def criar(inicio, fim, prevar):
     prefixo = "243672419"
     size = len(prefixo) + len(prevar)
     num = str(random.randint(inicio, fim))
     num = prefixo + prevar[ : len(prevar) - len(num)] + num
-    time.sleep(0.1)
+    time.sleep(0.5)
     return(num[ : size])
 
 GPIO.setup(LED1_RED,GPIO.OUT)
@@ -170,6 +170,7 @@ def getType():
     return typeRasp
 
 def showInfo():
+    time.sleep(0.5)
     lcd.lcd_display(spaceText("VERSAO " + config['VERSION']), spaceText("NOME " + getName()))
     time.sleep(4.0)
     lcd.lcd_display(spaceText("IP " + getIP()), spaceText("MAC " + ''.join(getMAC().split(':'))))
@@ -181,8 +182,9 @@ def showInfo():
 def shutdown():
     lcd.lcd_clear()
     GPIO.cleanup()
+    time.sleep(0.5)
     lcd.lcd_display(spaceText("DESLIGANDO..."))
-    time.sleep(1)
+    time.sleep(0.5)
     lcd.lcd_clear()
     lcd.lcd_backlight("off")
     os.system("sudo shutdown -h now")
@@ -190,7 +192,7 @@ def shutdown():
 def turnBuzzer():
     if(high):
         GPIO.output(BUZZER, 1)
-    time.sleep(0.3)
+    time.sleep(0.5)
     GPIO.output(BUZZER, 0)
 
 def changeRGBLed(r, g, b):
@@ -222,14 +224,16 @@ def changeDisplayLed(texto = ' '):
     if texto.count(' '):
         for i in reversed(range(0,len(texto))):
             if texto[i] == " ":
+                time.sleep(0.5)
                 lcd.lcd_display(spaceText(texto[:i]), spaceText(texto[i+1:len(texto)]))
                 break
     else:
+        time.sleep(0.5)
         lcd.lcd_display(spaceText(texto[:len(texto)]))
 
 def ledStatusChange(ledCode = 0):
     changeRGBLed(0, 0, 0)
-    time.sleep(0.02)
+    time.sleep(0.2)
     try:
         changeDisplayLed(status[ledCode])
         if ledCode == 0 or ledCode == 11:
@@ -249,8 +253,9 @@ def inputOffline(serialNumber1):
     print("INPUT OFFLINE")
     if tp == "AMARR":
         ledStatusChange(ledCode = 1)
-        #serialNumber2 = input()
-        serialNumber2 = criar(0, 3333, "000000")
+        serialNumber2 = input()
+        time.sleep(0.2)
+        #serialNumber2 = criar(0, 3333, "000000")
         print("{} -> {}".format(serialNumber1, serialNumber2))
     else:
         serialNumber2 = None
@@ -296,6 +301,7 @@ def sendBuffer():
 
 def inputOnline(serialNumber1, serialNumber2 = None):
     sensorMAC = getMAC()
+    time.sleep(0.3)
     lcd.lcd_display(spaceText(config['PROCESSING']))
     if serialNumber2 == None:
         url = server['SEND'].format(server['IP'], serialNumber1, sensorMAC)
@@ -305,29 +311,34 @@ def inputOnline(serialNumber1, serialNumber2 = None):
     try:
         resp = requests.post(url, headers = headers, timeout = 10)
         if resp.status_code != 200:
+            time.sleep(0.3)
             lcd.lcd_display(spaceText(config['TRYAGAIN']))
         else:
             jsonResp = json.loads(str(resp.text))
             resultCode = int(jsonResp["Resultado"])
             ledStatusChange(resultCode)
             if resultCode == 1:
-                serialNumber2 = criar(0, 3333, "000000")
-                #serialNumber2 = input()
+                #serialNumber2 = criar(0, 3333, "000000")
+                serialNumber2 = input()
+                time.sleep(0.2)
                 inputOnline(serialNumber1 = serialNumber1, serialNumber2 = serialNumber2)
     except Exception as e:
         print("Connection Exception")
         print(e)
+        time.sleep(0.3)
         lcd.lcd_display(spaceText(config['TRYAGAIN']))
 
 def sendInput():
     global offlineMode
     global high
-    aux = criar(333333, 336666, "000000")
-    inputText = aux
-    print("\n" + aux)
-    #inputText = input()
+    #aux = criar(333333, 336666, "000000")
+    #inputText = aux
+    #print("\n" + aux)
+    inputText = input()
+    time.sleep(0.2)
     turnBuzzer()
     if sync == True:
+        time.sleep(0.3)
         lcd.lcd_display(spaceText(config['SYNCING']))
     elif (inputText == "@@MCMEXIT@@"):
          return False
@@ -358,10 +369,12 @@ def verifyConnection():
         print("sync: {}".format(sync))
         print("stat: {}".format(stat))
         if hasOffline == True and offlineMode == False:
+            time.sleep(0.3)
             lcd.lcd_display(spaceText(config['SYNCING']))
             sync = True
             sendBuffer()
             sync = False
+            time.sleep(0.3)
             lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
         hasOffline = offlineMode
         try:
@@ -379,10 +392,12 @@ def verifyConnection():
             countConn += 1
         else:
             if stat is 1:
+                time.sleep(0.3)
                 lcd.lcd_display(spaceText(config['SYNCING']))
                 sync = True
                 sendBuffer()
                 sync = False
+                time.sleep(0.3)
                 lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
             if stat is not 2:
                 # print("Conectado")
@@ -400,6 +415,7 @@ def verifyConnection():
         else:
             time.sleep(2.5)
 
+time.sleep(0.3)
 lcd.lcd_display(spaceText(config['INITIALIZING']))
 setType()
 time.sleep(4)
