@@ -17,8 +17,8 @@ lcd = lcddriver.lcd()
 lcd.lcd_clear()
 
 LED1_RED = 23
-LED1_GREEN = 17
-LED1_BLUE = 22
+LED1_GREEN = 22
+LED1_BLUE = 17
 
 LED2_RED = 6
 LED2_GREEN = 25
