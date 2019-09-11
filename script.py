@@ -371,12 +371,12 @@ def verifyConnection():
         print("stat: {}".format(stat))
         if hasOffline == True and offlineMode == False:
             time.sleep(0.3)
-            lcd.lcd_display(spaceText(config['SYNCING']))
+            # lcd.lcd_display(spaceText(config['SYNCING']))
             sync = True
             sendBuffer()
             sync = False
             time.sleep(0.3)
-            lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
+            # lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
         hasOffline = offlineMode
         try:
             stat = int(getStatus())
@@ -394,12 +394,12 @@ def verifyConnection():
         else:
             if stat is 1:
                 time.sleep(0.3)
-                lcd.lcd_display(spaceText(config['SYNCING']))
+                # lcd.lcd_display(spaceText(config['SYNCING']))
                 sync = True
                 sendBuffer()
                 sync = False
                 time.sleep(0.3)
-                lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
+                # lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
             if stat is not 2:
                 # print("Conectado")
                 countConn = 0
