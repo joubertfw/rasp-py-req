@@ -298,6 +298,7 @@ def sendBuffer():
     else:
         print(resp.elapsed)
         dbExecute("DELETE FROM SerialNumbers;")
+    time.sleep(2.0)
 
 def inputOnline(serialNumber1, serialNumber2 = None):
     sensorMAC = getMAC()
