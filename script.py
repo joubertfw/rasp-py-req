@@ -366,10 +366,11 @@ def verifyConnection():
     changeRGBLed2(0, 0, 1)
 
     while (True):
+        print("dbExecute: {}".format(dbExecute("SELECT * FROM SerialNumbers LIMIT 1;")))
         print("offlineMode: {}".format(offlineMode))
         print("sync: {}".format(sync))
         print("stat: {}".format(stat))
-        if hasOffline == True and offlineMode == False:
+        if hasOffline == True and offlineMode == False and dbExecute("SELECT * FROM SerialNumbers LIMIT 1;") != []:
             time.sleep(0.3)
             # lcd.lcd_display(spaceText(config['SYNCING']))
             sync = True
