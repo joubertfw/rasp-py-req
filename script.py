@@ -254,7 +254,6 @@ def inputOffline(serialNumber1):
     if tp == "AMARR":
         ledStatusChange(ledCode = 1)
         serialNumber2 = input()
-        time.sleep(0.2)
         #serialNumber2 = criar(0, 3333, "000000")
         print("{} -> {}".format(serialNumber1, serialNumber2))
     else:
@@ -302,7 +301,6 @@ def sendBuffer():
 
 def inputOnline(serialNumber1, serialNumber2 = None):
     sensorMAC = getMAC()
-    time.sleep(0.3)
     lcd.lcd_display(spaceText(config['PROCESSING']))
     if serialNumber2 == None:
         url = server['SEND'].format(server['IP'], serialNumber1, sensorMAC)
@@ -312,7 +310,6 @@ def inputOnline(serialNumber1, serialNumber2 = None):
     try:
         resp = requests.post(url, headers = headers, timeout = 10)
         if resp.status_code != 200:
-            time.sleep(0.3)
             lcd.lcd_display(spaceText(config['TRYAGAIN']))
         else:
             jsonResp = json.loads(str(resp.text))
@@ -321,12 +318,10 @@ def inputOnline(serialNumber1, serialNumber2 = None):
             if resultCode == 1:
                 #serialNumber2 = criar(0, 3333, "000000")
                 serialNumber2 = input()
-                time.sleep(0.2)
                 inputOnline(serialNumber1 = serialNumber1, serialNumber2 = serialNumber2)
     except Exception as e:
         print("Connection Exception")
         print(e)
-        time.sleep(0.3)
         lcd.lcd_display(spaceText(config['TRYAGAIN']))
 
 def sendInput():
@@ -336,10 +331,9 @@ def sendInput():
     #inputText = aux
     #print("\n" + aux)
     inputText = input()
-    time.sleep(0.2)
     turnBuzzer()
     if sync == True:
-        time.sleep(0.3)
+        time.sleep(0.1)
         lcd.lcd_display(spaceText(config['SYNCING']))
     elif (inputText == "@@MCMEXIT@@"):
          return False
