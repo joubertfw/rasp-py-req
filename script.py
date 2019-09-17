@@ -413,7 +413,10 @@ def verifyConnection():
 
 time.sleep(0.3)
 lcd.lcd_display(spaceText(config['INITIALIZING']))
-setType()
+try:
+    setType()
+except Exception as e:
+    print(e)
 time.sleep(4)
 lcd.lcd_display(spaceText(config['READY'] + ": " + ''.join(getMAC().split(':'))), spaceText(getIP()))
 
