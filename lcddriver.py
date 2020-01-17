@@ -111,13 +111,15 @@ class lcd:
       self.lcd_write(LCD_CLEARDISPLAY)
       self.lcd_write(LCD_RETURNHOME)
 
-   def lcd_display(self, string_1, string_2 = None):
+   def lcd_display(self, string_1 = None, string_2 = None):
+      self.lcd_clear()
+      if string_1 is not None:
+         self.lcd_display_string(string_1, 1)
+         print(string_2)
       if string_2 is not None:
-         self.lcd_clear()
-         self.lcd_display_string(string_1, 1)
          self.lcd_display_string(string_2, 2)
-         print(string_1 + string_2)
-      else:
-         self.lcd_clear()
-         self.lcd_display_string(string_1, 1)
          print(string_1)
+
+   def lcd_displayLine(self, string, num):
+      self.lcd_display_string(string, num)
+

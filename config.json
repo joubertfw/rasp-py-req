@@ -11,7 +11,7 @@
     },
 
     "SERVER": {
-        "IP": "10.0.0.225",
+        "IP": "172.16.10.243",
         "KEY": "!@##@!c3p3d1!@##@!",
         "SYNC": "http://{}/MMHWebAPI/api/Produto/Sincronizar?sensorMAC={}",
         "SEND": "http://{}/MMHWebAPI/api/Produto/RegistrarNaRota?numeroSerie={}&sensorMAC={}",

@@ -26,7 +26,7 @@ LED2_BLUE = 24
 BUZZER = 5
 
 def criar(inicio, fim, prevar):
-    prefixo = "243672419"
+    prefixo = "244175019"
     size = len(prefixo) + len(prevar)
     num = str(random.randint(inicio, fim))
     num = prefixo + prevar[ : len(prevar) - len(num)] + num
@@ -60,6 +60,7 @@ offlineMode = False
 sync = False
 high = False
 stat = "0"
+countPlaca = 0
 headers = {"APIkey" : server['KEY'] }
 typeRasp = ""
 
@@ -94,7 +95,7 @@ def setTime():
     print("SET TIME")
     url = server['TIME'].format(server['IP'], getMAC())
     try:
-        resp = requests.get(url, headers = headers)
+        resp = requests.get(url, headers = headers, timeout = 5)
         jsonResp = json.loads(str(resp.text))
     except Exception as e:
         print("Exception in getTime")
@@ -110,7 +111,7 @@ def setTime():
 def getName():
     url = server['NAME'].format(server['IP'], getMAC())
     try:
-        resp = requests.get(url, headers = headers)
+        resp = requests.get(url, headers = headers, timeout = 5)
         jsonResp = json.loads(str(resp.text))
     except Exception as e:
         print("Exception in getName")
@@ -122,7 +123,7 @@ def getName():
 def getStatus():
     url = server['STAT'].format(server['IP'], getMAC())
     try:
-        resp = requests.get(url, headers = headers)
+        resp = requests.get(url, headers = headers, timeout = 5)
         jsonResp = json.loads(str(resp.text))
     except Exception as e:
         print("Exception in getStatus")
@@ -143,7 +144,7 @@ def dbExecute(querry):
 def setType():
     url = server['TYPE'].format(server['IP'], getMAC())
     try:
-        resp = requests.get(url, headers = headers)
+        resp = requests.get(url, headers = headers, timeout = 5)
         tipo = json.loads(str(resp.text))
     except Exception as e:
         print("Exception in setType")
@@ -300,6 +301,7 @@ def sendBuffer():
     time.sleep(2.0)
 
 def inputOnline(serialNumber1, serialNumber2 = None):
+    global countPlaca
     sensorMAC = getMAC()
     lcd.lcd_display(spaceText(config['PROCESSING']))
     if serialNumber2 == None:
@@ -315,6 +317,14 @@ def inputOnline(serialNumber1, serialNumber2 = None):
             jsonResp = json.loads(str(resp.text))
             resultCode = int(jsonResp["Resultado"])
             ledStatusChange(resultCode)
+            if resultCode == 0:
+                if countPlaca < int(jsonResp["Quantidade"]):
+                    countPlaca += 1
+                else:
+                    countPlaca = 1
+                lcd.lcd_displayLine(spaceText(str(countPlaca) + " de " + str(jsonResp["Quantidade"])), 2)
+            #Change
+            print(jsonResp)
             if resultCode == 1:
                 #serialNumber2 = criar(0, 3333, "000000")
                 serialNumber2 = input()
@@ -327,10 +337,10 @@ def inputOnline(serialNumber1, serialNumber2 = None):
 def sendInput():
     global offlineMode
     global high
-    #aux = criar(333333, 336666, "000000")
-    #inputText = aux
+    aux = criar(333333, 334666, "000000")
+    inputText = aux
     #print("\n" + aux)
-    inputText = input()
+    #inputText = input()
     turnBuzzer()
     if sync == True:
         time.sleep(0.1)
@@ -347,7 +357,12 @@ def sendInput():
         if offlineMode == True:
             inputOffline(serialNumber1 = inputText)
         else:
+            f = open("tempo2.txt", "a+")
+            t_time = time.time()
             inputOnline(serialNumber1 = inputText)
+            f.write(str(time.time() - t_time) + "\n")
+            f.close()
+
     return True
 
 def verifyConnection():
