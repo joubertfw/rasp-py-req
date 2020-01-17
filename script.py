@@ -61,6 +61,7 @@ sync = False
 high = False
 stat = "0"
 countPlaca = 0
+countGeral = 0
 headers = {"APIkey" : server['KEY'] }
 typeRasp = ""
 
@@ -248,6 +249,7 @@ def ledStatusChange(ledCode = 0):
         print(e)
 
 def inputOffline(serialNumber1):
+    global countGeral
     sensorMAC = getMAC()
     tp = getType()
     url = server['SEND'].format(server['IP'], serialNumber1, sensorMAC)
@@ -273,11 +275,17 @@ def inputOffline(serialNumber1):
                 ledStatusChange(ledCode = 11)
             else:
                 ledStatusChange(resultCode)
+            countGeral %= 999
+            countGeral += 1
+            lcd.lcd_displayLine(spaceText("TOTAL {}".format(countGeral)), 2)
         except Exception as e:
             print(e)
     else:
         dbExecute("INSERT INTO SerialNumbers (NumeroSerie1, NumeroSerie2, Data) VALUES ('{}', '{}', '{}');".format(serialNumber1, serialNumber2, datetime.now()))
+        countGeral %= 999
+        countGeral += 1
         ledStatusChange(ledCode = 11)
+        lcd.lcd_displayLine(spaceText("TOTAL {}".format(countGeral)), 2)
 
 def selectDBFormated():
     conn = sqlite3.connect('/home/pi/rasp-py-req/raspSN.db')
@@ -302,6 +310,7 @@ def sendBuffer():
 
 def inputOnline(serialNumber1, serialNumber2 = None):
     global countPlaca
+    global countGeral
     sensorMAC = getMAC()
     lcd.lcd_display(spaceText(config['PROCESSING']))
     if serialNumber2 == None:
@@ -318,13 +327,13 @@ def inputOnline(serialNumber1, serialNumber2 = None):
             resultCode = int(jsonResp["Resultado"])
             ledStatusChange(resultCode)
             if resultCode == 0:
+                countGeral %= 999
+                countGeral += 1
                 if countPlaca < int(jsonResp["Quantidade"]):
                     countPlaca += 1
                 else:
                     countPlaca = 1
-                lcd.lcd_displayLine(spaceText(str(countPlaca) + " de " + str(jsonResp["Quantidade"])), 2)
-            #Change
-            print(jsonResp)
+                lcd.lcd_displayLine(spaceText("{} DE {} - {}".format(str(countPlaca), str(jsonResp["Quantidade"]), str(countGeral))), 2)
             if resultCode == 1:
                 #serialNumber2 = criar(0, 3333, "000000")
                 serialNumber2 = input()
