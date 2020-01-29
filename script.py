@@ -346,10 +346,10 @@ def inputOnline(serialNumber1, serialNumber2 = None):
 def sendInput():
     global offlineMode
     global high
-    aux = criar(333333, 334666, "000000")
-    inputText = aux
+    #aux = criar(333333, 334666, "000000")
+    #inputText = aux
     #print("\n" + aux)
-    #inputText = input()
+    inputText = input()
     turnBuzzer()
     if sync == True:
         time.sleep(0.1)
